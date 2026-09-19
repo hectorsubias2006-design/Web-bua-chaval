@@ -103,7 +103,7 @@ export const BAR_MENU: MenuSectionData = {
       subtitle: 'Raciones y tapas',
       items: [
         { name: 'TEQUEÑOS CON SALSA ALI OLI', price: '8.25€' },
-        { name: 'CROQUETAS CON PICO DE GALLO Y SALSA AHUMADA (6UD)', price: '2.80€' },
+        { name: 'CROQUETAS CON PICO DE GALLO Y SALSA AHUMADA ', price: '2.80€' },
         { name: 'FINGERS DE POLLO CASEROS REBOZADOS CON SÉSAMO BLANCO Y NEGRO', price: '8.80€' },
         { name: 'PATATAS 3 SALSAS', price: '7.50€' },
         { name: 'GUACAMOLE CASERO CON NACHOS CALIENTES', price: '12.80€' },
