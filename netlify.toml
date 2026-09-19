@@ -1,0 +1,10 @@
+# Configuración de Netlify para Búa Chaval
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+# Soporte para despliegue estático directo si no se usa compilación Next.js
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
