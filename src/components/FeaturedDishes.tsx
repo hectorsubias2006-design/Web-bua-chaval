@@ -17,12 +17,12 @@ export default function FeaturedDishes() {
         </p>
       </div>
 
-      {/* 3 Platos Estrella Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg max-w-6xl mx-auto mb-space-xl">
+      {/* 4 Platos Estrella Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md max-w-7xl mx-auto mb-space-xl">
         
         {/* Tarjeta 1: Chuletón de la Finca */}
         <div className="group bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col border border-outline-variant/30">
-          <div className="relative w-full h-64 sm:h-72 overflow-hidden bg-surface-container">
+          <div className="relative w-full h-60 overflow-hidden bg-surface-container">
             <div
               className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
               style={{
@@ -34,34 +34,73 @@ export default function FeaturedDishes() {
             </span>
           </div>
 
-          <div className="p-space-md sm:p-space-lg flex flex-col justify-between flex-grow space-y-space-md">
+          <div className="p-space-md flex flex-col justify-between flex-grow space-y-space-md">
             <div className="space-y-space-xs">
               <div className="flex items-baseline justify-between gap-space-sm">
-                <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
-                  Chuletón de la Finca 500g
+                <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold text-lg">
+                  Chuletón de la Finca
                 </h3>
                 <span className="font-headline-sm text-headline-sm text-primary font-bold shrink-0">
                   25,50€
                 </span>
               </div>
-              <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-                Chuletón trinchado con pimientos de Padrón a la brasa de carbón vegetal, aromatizado con romero y sal marina en escamas. Opción Bandeja 1kg disponible.
+              <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed text-xs sm:text-sm">
+                Chuletón trinchado con pimientos de Padrón a la brasa de carbón vegetal, aromatizado con romero y sal marina. Opción 1kg.
               </p>
             </div>
 
-            <div className="pt-space-sm border-t border-outline-variant/30 flex items-center justify-between text-secondary font-label-sm text-label-sm">
+            <div className="pt-space-sm border-t border-outline-variant/30 flex items-center justify-between text-secondary font-label-sm text-label-sm text-xs">
               <div className="flex items-center gap-space-xs">
-                <span className="material-symbols-outlined text-[18px]">local_fire_department</span>
-                <span className="font-medium">Carbón vegetal</span>
+                <span className="material-symbols-outlined text-[16px]">local_fire_department</span>
+                <span className="font-medium">500g / 1kg</span>
               </div>
               <span className="text-on-surface-variant font-medium">Bandeja 1kg: 55€</span>
             </div>
           </div>
         </div>
 
-        {/* Tarjeta 2: Pulpo a la Brasa */}
+        {/* Tarjeta 2: Tabla de Cachopo XL */}
         <div className="group bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col border border-outline-variant/30">
-          <div className="relative w-full h-64 sm:h-72 overflow-hidden bg-surface-container">
+          <div className="relative w-full h-60 overflow-hidden bg-surface-container">
+            <div
+              className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+              style={{
+                backgroundImage: `url('/cachopo-tabla.jpg')`,
+              }}
+            />
+            <span className="absolute top-3 left-3 px-space-sm py-1 rounded bg-primary-container text-on-primary font-label-sm text-label-sm uppercase tracking-wider font-semibold shadow-sm">
+              Especialidad Casa
+            </span>
+          </div>
+
+          <div className="p-space-md flex flex-col justify-between flex-grow space-y-space-md">
+            <div className="space-y-space-xs">
+              <div className="flex items-baseline justify-between gap-space-sm">
+                <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold text-lg">
+                  Bandeja de Cachopo
+                </h3>
+                <span className="font-headline-sm text-headline-sm text-primary font-bold shrink-0">
+                  50,00€
+                </span>
+              </div>
+              <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed text-xs sm:text-sm">
+                Ternera crujiente rellena de jamón y queso fundido en tabla con pimientos asados y patatas doradas. Opción individual por 25€.
+              </p>
+            </div>
+
+            <div className="pt-space-sm border-t border-outline-variant/30 flex items-center justify-between text-secondary font-label-sm text-label-sm text-xs">
+              <div className="flex items-center gap-space-xs">
+                <span className="material-symbols-outlined text-[16px]">restaurant</span>
+                <span className="font-medium">Bandeja 1kg: 50€</span>
+              </div>
+              <span className="text-primary font-semibold">Individual: 25€</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Tarjeta 3: Pulpo a la Brasa */}
+        <div className="group bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col border border-outline-variant/30">
+          <div className="relative w-full h-60 overflow-hidden bg-surface-container">
             <div
               className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
               style={{
@@ -73,24 +112,24 @@ export default function FeaturedDishes() {
             </span>
           </div>
 
-          <div className="p-space-md sm:p-space-lg flex flex-col justify-between flex-grow space-y-space-md">
+          <div className="p-space-md flex flex-col justify-between flex-grow space-y-space-md">
             <div className="space-y-space-xs">
               <div className="flex items-baseline justify-between gap-space-sm">
-                <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+                <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold text-lg">
                   Pulpo a la Brasa
                 </h3>
                 <span className="font-headline-sm text-headline-sm text-primary font-bold shrink-0">
                   22,50€
                 </span>
               </div>
-              <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-                Pata de pulpo seleccionada marcada a la brasa de carbón vegetal, servida sobre suave parmentier de patatas, pimentón de la Vera y crujientes de la huerta.
+              <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed text-xs sm:text-sm">
+                Pata de pulpo seleccionada a la brasa de carbón vegetal sobre suave parmentier de patatas casero y pimentón de la Vera.
               </p>
             </div>
 
-            <div className="pt-space-sm border-t border-outline-variant/30 flex items-center justify-between text-secondary font-label-sm text-label-sm">
+            <div className="pt-space-sm border-t border-outline-variant/30 flex items-center justify-between text-secondary font-label-sm text-label-sm text-xs">
               <div className="flex items-center gap-space-xs">
-                <span className="material-symbols-outlined text-[18px]">set_meal</span>
+                <span className="material-symbols-outlined text-[16px]">set_meal</span>
                 <span className="font-medium">Parmentier casero</span>
               </div>
               <span className="text-on-surface-variant font-medium">Plato estrella</span>
@@ -98,9 +137,9 @@ export default function FeaturedDishes() {
           </div>
         </div>
 
-        {/* Tarjeta 3: Sabor a Cuba */}
-        <div className="group bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col border border-outline-variant/30 md:col-span-2 lg:col-span-1">
-          <div className="relative w-full h-64 sm:h-72 overflow-hidden bg-surface-container">
+        {/* Tarjeta 4: Sabor a Cuba */}
+        <div className="group bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col border border-outline-variant/30">
+          <div className="relative w-full h-60 overflow-hidden bg-surface-container">
             <div
               className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
               style={{
@@ -112,27 +151,27 @@ export default function FeaturedDishes() {
             </span>
           </div>
 
-          <div className="p-space-md sm:p-space-lg flex flex-col justify-between flex-grow space-y-space-md">
+          <div className="p-space-md flex flex-col justify-between flex-grow space-y-space-md">
             <div className="space-y-space-xs">
               <div className="flex items-baseline justify-between gap-space-sm">
-                <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+                <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold text-lg">
                   Sabor a Cuba
                 </h3>
                 <span className="font-headline-sm text-headline-sm text-primary font-bold shrink-0">
                   Especialidad
                 </span>
               </div>
-              <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-                Auténtica cocina criolla con ropa vieja deshebrada, arroz congri, yuca con mojo criollo, mariquitas y tostones de plátano maduro frito.
+              <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed text-xs sm:text-sm">
+                Auténtica cocina criolla: ropa vieja deshebrada, arroz congrí, yuca con mojo criollo, mariquitas y tostones de plátano.
               </p>
             </div>
 
-            <div className="pt-space-sm border-t border-outline-variant/30 flex items-center justify-between text-secondary font-label-sm text-label-sm">
+            <div className="pt-space-sm border-t border-outline-variant/30 flex items-center justify-between text-secondary font-label-sm text-label-sm text-xs">
               <div className="flex items-center gap-space-xs">
-                <span className="material-symbols-outlined text-[18px]">flare</span>
-                <span className="font-medium">Sazón de La Habana</span>
+                <span className="material-symbols-outlined text-[16px]">flare</span>
+                <span className="font-medium">Sazón cubana</span>
               </div>
-              <span className="text-on-surface-variant font-medium">Volcán 6 pax: 150€</span>
+              <span className="text-on-surface-variant font-medium">Volcán 6pax: 150€</span>
             </div>
           </div>
         </div>
