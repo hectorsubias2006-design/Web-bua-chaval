@@ -1,6 +1,7 @@
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import About from '@/components/About';
+import GrillBanner from '@/components/GrillBanner';
 import FeaturedDishes from '@/components/FeaturedDishes';
 import MenuSection from '@/components/MenuSection';
 import SpaceFeatures from '@/components/SpaceFeatures';
@@ -14,6 +15,7 @@ export default function Home() {
         <div className="flex flex-col w-full">
           <Hero />
           <About />
+          <GrillBanner />
           <FeaturedDishes />
           <MenuSection />
           <SpaceFeatures />

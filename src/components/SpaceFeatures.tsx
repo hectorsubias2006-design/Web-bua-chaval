@@ -15,6 +15,36 @@ export default function SpaceFeatures() {
         </p>
       </div>
 
+      {/* Featured Dining Room Photo Banner */}
+      <div className="max-w-6xl mx-auto mb-space-xl rounded-2xl overflow-hidden shadow-xl border border-outline-variant/30 relative group">
+        <div className="relative h-72 sm:h-96 md:h-[420px] w-full overflow-hidden">
+          <div
+            className="w-full h-full bg-cover bg-center group-hover:scale-102 transition-transform duration-700"
+            style={{
+              backgroundImage: `url('/comedor-local.jpg')`,
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+          <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 right-4 sm:right-6 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 text-white">
+            <div className="space-y-1">
+              <span className="inline-block px-3 py-1 rounded bg-secondary text-on-secondary font-label-sm text-label-sm uppercase tracking-wider font-semibold">
+                Salón Comedor
+              </span>
+              <h3 className="font-headline-sm sm:font-headline-md text-headline-sm sm:text-headline-md text-white font-semibold">
+                Un espacio amplio, luminoso y familiar
+              </h3>
+              <p className="font-body-sm text-body-sm text-white/90 max-w-xl">
+                Diseñado para que te sientas como en casa: mesas confortables, pasillos amplios, climatización integral y tronas preparadas para los más peques.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-black/40 backdrop-blur-md border border-white/20 text-xs sm:text-sm text-white shrink-0">
+              <span className="material-symbols-outlined text-secondary text-[20px]">groups</span>
+              <span className="font-medium">Grupos hasta 50 personas</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* 3 Family Feature Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-space-lg max-w-6xl mx-auto">
         

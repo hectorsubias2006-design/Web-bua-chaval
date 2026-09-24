@@ -65,26 +65,56 @@ export default function About() {
         </div>
 
         {/* Image & Float Badge Column */}
-        <div className="lg:col-span-6 relative">
-          <div className="relative w-full h-[460px] md:h-[540px] rounded-lg overflow-hidden shadow-xl">
-            <div
-              className="w-full h-full bg-cover bg-center"
-              style={{
-                backgroundImage: `url('/neon-interior.webp')`,
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-tr from-on-background/30 via-transparent to-transparent" />
+        <div className="lg:col-span-6 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Foto 1: Neón Búa Chaval */}
+            <div className="relative h-64 sm:h-80 rounded-xl overflow-hidden shadow-lg border border-outline-variant/20 group">
+              <div
+                className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+                style={{
+                  backgroundImage: `url('/neon-interior.webp')`,
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-3 left-3 right-3 text-white">
+                <span className="text-[11px] font-bold uppercase tracking-wider bg-black/50 px-2 py-0.5 rounded backdrop-blur-sm">
+                  Espacio Búa Chaval
+                </span>
+                <p className="font-body-sm text-xs text-white/90 mt-1 font-medium">
+                  Rincón tropical con iluminación cálida y vegetación
+                </p>
+              </div>
+            </div>
+
+            {/* Foto 2: Rincón Cubano */}
+            <div className="relative h-64 sm:h-80 rounded-xl overflow-hidden shadow-lg border border-outline-variant/20 group">
+              <div
+                className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+                style={{
+                  backgroundImage: `url('/rincon-cubano.jpg')`,
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-3 left-3 right-3 text-white">
+                <span className="text-[11px] font-bold uppercase tracking-wider bg-black/50 px-2 py-0.5 rounded backdrop-blur-sm">
+                  Sabor a Cuba
+                </span>
+                <p className="font-body-sm text-xs text-white/90 mt-1 font-medium">
+                  Homenaje a la música, el arte y las raíces criollas
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Overlapping Card */}
-          <div className="sm:absolute -bottom-8 -left-6 max-w-sm mt-space-md sm:mt-0 p-space-md bg-surface-container-lowest rounded-lg shadow-xl space-y-space-xs border border-outline-variant/30">
+          <div className="p-space-md bg-surface-container-lowest rounded-xl shadow-md space-y-space-xs border border-outline-variant/30">
             <div className="flex items-center gap-space-xs text-secondary">
-              <span className="material-symbols-outlined text-[20px]">markdown_copy</span>
-              <span className="font-label-sm text-label-sm uppercase tracking-wider font-bold">Ambiente Único</span>
+              <span className="material-symbols-outlined text-[20px]">storefront</span>
+              <span className="font-label-sm text-label-sm uppercase tracking-wider font-bold">Un ambiente cuidado al detalle</span>
             </div>
             <h4 className="font-headline-sm text-headline-sm text-on-surface">Un rincón tropical en Utebo</h4>
             <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Luz cálida, vegetación y la cadencia de una sobremesa sin prisas en el valle del Ebro.
+              Luz cálida, detalles de la tradición cubana y la cadencia de una sobremesa sin prisas en el corazón de Utebo.
             </p>
           </div>
         </div>
