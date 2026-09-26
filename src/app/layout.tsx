@@ -35,6 +35,9 @@ export const metadata: Metadata = {
     locale: 'es_ES',
     type: 'website',
   },
+  verification: {
+    google: '8HSsq3WiEVX-WVstaFWWUnCH-M2b-NQbDLn6B4awtJs',
+  },
 };
 
 export default function RootLayout({
@@ -46,6 +49,7 @@ export default function RootLayout({
     <html lang="es" className={`${playfair.variable} ${plusJakarta.variable}`}>
       <head>
         <link rel="icon" href="/logo.png" />
+        <meta name="google-site-verification" content="8HSsq3WiEVX-WVstaFWWUnCH-M2b-NQbDLn6B4awtJs" />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
