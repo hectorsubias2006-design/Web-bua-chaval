@@ -17,8 +17,8 @@ export default function FeaturedDishes() {
         </p>
       </div>
 
-      {/* 4 Platos Estrella Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md max-w-7xl mx-auto mb-space-xl">
+      {/* 5 Platos Estrella Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-space-md max-w-7xl mx-auto mb-space-xl">
         
         {/* Tarjeta 1: Chuletón de la Finca */}
         <div className="group bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col border border-outline-variant/30">
@@ -172,6 +172,45 @@ export default function FeaturedDishes() {
                 <span className="font-medium">Sazón cubana</span>
               </div>
               <span className="text-on-surface-variant font-medium">Volcán 6pax: 150€</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Tarjeta 5: Guacamole Casero */}
+        <div className="group bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col border border-outline-variant/30">
+          <div className="relative w-full h-60 overflow-hidden bg-surface-container">
+            <div
+              className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+              style={{
+                backgroundImage: `url('/guacamole.jpg')`,
+              }}
+            />
+            <span className="absolute top-3 left-3 px-space-sm py-1 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm uppercase tracking-wider font-semibold shadow-sm">
+              Hecho al Momento
+            </span>
+          </div>
+
+          <div className="p-space-md flex flex-col justify-between flex-grow space-y-space-md">
+            <div className="space-y-space-xs">
+              <div className="flex items-baseline justify-between gap-space-sm">
+                <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold text-lg">
+                  Guacamole Casero
+                </h3>
+                <span className="font-headline-sm text-headline-sm text-primary font-bold shrink-0">
+                  12,80€
+                </span>
+              </div>
+              <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed text-xs sm:text-sm">
+                Aguacate fresco majado al momento en mortero tradicional con pico de gallo, lima y abundante bandeja de totopos crujientes.
+              </p>
+            </div>
+
+            <div className="pt-space-sm border-t border-outline-variant/30 flex items-center justify-between text-secondary font-label-sm text-label-sm text-xs">
+              <div className="flex items-center gap-space-xs">
+                <span className="material-symbols-outlined text-[16px]">restaurant</span>
+                <span className="font-medium">Mortero tradicional</span>
+              </div>
+              <span className="text-on-surface-variant font-medium">Totopos crujientes</span>
             </div>
           </div>
         </div>

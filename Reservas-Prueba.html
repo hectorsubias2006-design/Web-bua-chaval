@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Búa Chaval | Sistema Inteligente de Reservas</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              charcoal: '#121110',
+              surface: '#1A1816',
+              surfaceLight: '#25211D',
+              border: '#332E29',
+              borderLight: '#443D36',
+              primary: '#E05A2B',      /* Terracota fuego */
+              primaryHover: '#C8481B',
+              secondary: '#D4A373',    /* Madera cálida */
+              gold: '#E5B869',
+              emerald: '#2EB886',
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    body, input, select, textarea, button {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    h1, h2, h3, .font-serif {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+    /* Scrollbar personalizada */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #121110;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2D2924;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #E05A2B;
+    }
+    /* Ocultar flechas arriba/abajo (spinners) de inputs de número */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+  </style>
+</head>
+<body class="bg-brand-charcoal text-stone-200 min-h-screen flex flex-col selection:bg-brand-primary selection:text-white antialiased">
+
+  <!-- ========================================================= -->
+  <!-- HEADER / NAVEGACIÓN SUPERIOR                              -->
+  <!-- ========================================================= -->
+  <header class="bg-brand-surface/95 backdrop-blur-md border-b border-brand-border sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Logotipo Búa Chaval con icono de llama SVG -->
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-brand-primary/15 border border-brand-primary/30 flex items-center justify-center text-brand-primary shadow-lg shadow-brand-primary/10 shrink-0">
+          <!-- SVG Llama Limpio -->
+          <svg class="w-6 h-6 text-brand-primary" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 23c-4.97 0-9-4.03-9-9 0-4.09 3.01-7.79 6.27-10.99.78-.77 2.05-.22 2.05.88 0 2.08 1.44 3.73 3.32 4.19.86.21 1.54-.7 1.25-1.52C14.7 3.38 12.83 2 12 2c0 0 8 3.5 8 12 0 4.97-4.03 9-9 9z"/>
+          </svg>
+        </div>
+        <div>
+          <span class="text-xl font-serif font-bold text-white tracking-wide block leading-tight">Búa Chaval</span>
+          <span class="text-[11px] font-semibold tracking-widest text-brand-secondary uppercase">Asador & Brasas · Utebo</span>
+        </div>
+      </div>
+
+      <!-- Selector de Modo: Clientes vs Administrador -->
+      <div class="flex items-center gap-1.5 bg-stone-900/90 p-1.5 rounded-xl border border-brand-border">
+        <button id="nav-client-btn" onclick="switchView('client')" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 bg-brand-primary text-white shadow-md">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          <span>Reservar Mesa</span>
+        </button>
+        <button id="nav-admin-btn" onclick="openAdminAuth()" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 text-stone-400 hover:text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <span>Acceso Sala (Admin)</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ========================================================= -->
+  <!-- VISTA 1: FORMULARIO CLIENTES PARA RESERVAR               -->
+  <!-- ========================================================= -->
+  <main id="client-view" class="flex-grow max-w-4xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-12">
+    
+    <!-- Encabezado de la página -->
+    <div class="text-center space-y-3 mb-8">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-primary/10 border border-brand-primary/30 text-brand-primary text-xs font-bold uppercase tracking-wider">
+        <span>Reserva Online Inmediata</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-serif font-bold text-white tracking-tight">
+        Reserva tu mesa en Búa Chaval
+      </h1>
+      <p class="text-stone-400 max-w-lg mx-auto text-sm leading-relaxed">
+        Carbón vegetal, carnes selectas y tradición. Asignación inmediata de mesa para parejas, familias y grupos.
+      </p>
+    </div>
+
+    <!-- Tarjeta Principal de Reserva -->
+    <div class="bg-brand-surface rounded-2xl border border-brand-border shadow-2xl p-6 sm:p-10">
+      <form id="reservation-form" onsubmit="handleReservationSubmit(event)" class="space-y-7">
+        
+        <!-- Fila 1: Fecha, Turno y Personas -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          
+          <!-- Fecha -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold uppercase tracking-wider text-stone-300">
+              Fecha
+            </label>
+            <input type="date" id="res-date" required onchange="onDateOrTurnChange()" class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-3.5 py-3 text-white text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+          </div>
+
+          <!-- Turno (Comida o Cena) -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold uppercase tracking-wider text-stone-300">
+              Turno
+            </label>
+            <select id="res-turn" required onchange="onDateOrTurnChange()" class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-3.5 py-3 text-white text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all cursor-pointer">
+              <option value="comida">Comidas (Mediodía)</option>
+              <option value="cena">Cenas (Noche)</option>
+            </select>
+          </div>
+
+          <!-- Comensales -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold uppercase tracking-wider text-stone-300">
+              Comensales
+            </label>
+            <div class="flex items-center bg-brand-charcoal border border-brand-border rounded-xl overflow-hidden h-[46px]">
+              <button type="button" onclick="adjustGuests(-1)" class="w-12 h-full text-stone-300 hover:text-white hover:bg-stone-800 text-xl font-bold transition-colors flex items-center justify-center select-none">
+                −
+              </button>
+              <input type="number" id="res-guests" value="2" min="1" max="25" readonly class="w-full bg-transparent text-center text-white font-bold text-base focus:outline-none select-none cursor-default">
+              <button type="button" onclick="adjustGuests(1)" class="w-12 h-full text-stone-300 hover:text-white hover:bg-stone-800 text-xl font-bold transition-colors flex items-center justify-center select-none">
+                +
+              </button>
+            </div>
+            <p id="group-notice" class="text-[11px] text-brand-secondary hidden pt-1">
+              ✨ Grupo grande: el sistema unirá mesas contiguas automáticamente.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Fila 2: Selector de Horas cada 15 min -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between flex-wrap gap-1">
+            <label class="block text-xs font-bold uppercase tracking-wider text-stone-300">
+              Hora de llegada (intervalos de 15 min)
+            </label>
+            <span id="turn-hours-label" class="text-xs text-stone-400 font-medium">13:00 a 15:45 (Mediodía)</span>
+          </div>
+          <p class="text-[11px] text-stone-500">
+            Control de cocina: los horarios tachados están completos para este tamaño de grupo.
+          </p>
+
+          <div id="time-slots-container" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+            <!-- Rellenado dinámico con JS -->
+          </div>
+          <input type="hidden" id="res-time" required>
+        </div>
+
+        <!-- Fila 3: Selector de Tronas (Máx 2 en el local) -->
+        <div class="p-4 rounded-xl bg-brand-surfaceLight border border-brand-border space-y-3">
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-brand-gold/15 text-brand-gold flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-brand-gold" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-white">¿Necesitas trona para niños o bebés?</h4>
+                <p id="highchair-status-text" class="text-xs text-stone-400">Disponemos de 2 tronas en el restaurante.</p>
+              </div>
+            </div>
+
+            <!-- Botones de selección de tronas -->
+            <div id="highchair-btn-group" class="flex items-center gap-1.5 bg-brand-charcoal p-1 rounded-xl border border-brand-border">
+              <button type="button" onclick="selectHighchairs(0)" id="hc-btn-0" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-brand-primary text-white transition-all">
+                Ninguna
+              </button>
+              <button type="button" onclick="selectHighchairs(1)" id="hc-btn-1" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-stone-300 hover:text-white transition-all">
+                1 Trona
+              </button>
+              <button type="button" onclick="selectHighchairs(2)" id="hc-btn-2" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-stone-300 hover:text-white transition-all">
+                2 Tronas
+              </button>
+            </div>
+          </div>
+          <input type="hidden" id="res-highchairs" value="0">
+        </div>
+
+        <!-- Fila 4: Datos de Contacto del Cliente -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-3 border-t border-brand-border">
+          
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold uppercase tracking-wider text-stone-300">Nombre y Apellidos</label>
+            <input type="text" id="res-name" placeholder="Ej: Marcos Pérez" required class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-3.5 py-3 text-white text-sm placeholder-stone-600 focus:outline-none focus:border-brand-primary">
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold uppercase tracking-wider text-stone-300">Teléfono móvil</label>
+            <input type="tel" id="res-phone" placeholder="Ej: 612 34 56 78" required class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-3.5 py-3 text-white text-sm placeholder-stone-600 focus:outline-none focus:border-brand-primary">
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold uppercase tracking-wider text-stone-300">Email (Opcional)</label>
+            <input type="email" id="res-email" placeholder="Para confirmación digital" class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-3.5 py-3 text-white text-sm placeholder-stone-600 focus:outline-none focus:border-brand-primary">
+          </div>
+
+        </div>
+
+        <!-- Comentarios y Peticiones Especiales -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-300 flex items-center justify-between">
+            <span>Peticiones especiales o intolerancias</span>
+            <span class="text-stone-500 font-normal lowercase">(Opcional)</span>
+          </label>
+          <input type="text" id="res-notes" placeholder="Ej: Celebración de cumpleaños, alergias..." class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-3.5 py-3 text-white text-sm placeholder-stone-600 focus:outline-none focus:border-brand-primary">
+        </div>
+
+        <!-- Panel de Estado / Disponibilidad Limpio (Sin textos residuales) -->
+        <div id="availability-preview" class="p-4 rounded-xl bg-brand-charcoal border border-brand-border transition-all">
+          <div class="flex items-center gap-3">
+            <div id="avail-status-dot" class="w-3.5 h-3.5 rounded-full bg-emerald-500 shrink-0"></div>
+            <div>
+              <p id="avail-title" class="text-sm font-semibold text-white">Disponibilidad en sala confirmada</p>
+              <p id="avail-subtitle" class="text-xs text-stone-400">Hay mesas idóneas para tu reserva en esta franja.</p>
+            </div>
+          </div>
+
+          <!-- Caja de aviso y llamada directa si no hay sitio -->
+          <div id="no-availability-box" class="hidden mt-3 pt-3 border-t border-stone-800 text-xs text-stone-300 space-y-3">
+            <p class="leading-relaxed">
+              En este momento no disponemos de mesas online para este grupo o turno. Si deseas consultar posibles cancelaciones o huecos de última hora, ponte en contacto directo con nosotros:
+            </p>
+            <a href="tel:+34624282993" class="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-primary text-white font-bold rounded-lg text-xs hover:bg-brand-primaryHover transition-colors shadow-md">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+              </svg>
+              <span>Llamar al Restaurante: 624 28 29 93</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Botón de Confirmación Principal Limpio -->
+        <button type="submit" id="submit-res-btn" class="w-full py-4 bg-brand-primary hover:bg-brand-primaryHover text-white font-bold text-sm sm:text-base uppercase tracking-wider rounded-xl shadow-xl shadow-brand-primary/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <span>Confirmar Reserva de Mesa</span>
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Modal de Confirmación para Cliente -->
+    <div id="success-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-brand-surface border border-brand-border max-w-lg w-full rounded-2xl p-6 sm:p-8 space-y-6 text-center shadow-2xl">
+        
+        <div class="w-14 h-14 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto shadow-lg">
+          <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+
+        <div class="space-y-1">
+          <h3 class="text-2xl font-serif font-bold text-white">¡Reserva Confirmada!</h3>
+          <p class="text-xs sm:text-sm text-stone-400">Te esperamos en el Asador Búa Chaval para disfrutar de la mejor gastronomía.</p>
+        </div>
+
+        <!-- Resumen de la Reserva -->
+        <div id="modal-summary" class="bg-brand-charcoal rounded-xl p-4 text-left space-y-2.5 text-xs sm:text-sm border border-brand-border">
+          <!-- Rellenado dinámicamente -->
+        </div>
+
+        <button onclick="closeSuccessModal()" class="w-full py-3 bg-brand-primary text-white font-bold rounded-xl hover:bg-brand-primaryHover transition-colors text-sm uppercase tracking-wider">
+          Aceptar y Cerrar
+        </button>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- VISTA 2: PANEL DE ADMINISTRADOR & PLANO DE SALA           -->
+  <!-- ========================================================= -->
+  <main id="admin-view" class="flex-grow max-w-6xl mx-auto w-full px-4 sm:px-6 py-8 hidden">
+    
+    <!-- Barra Superior Admin -->
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-brand-border">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded-full bg-brand-primary/20 text-brand-primary text-xs font-bold uppercase tracking-wider border border-brand-primary/30">
+            Control de Sala
+          </span>
+          <span class="text-xs text-stone-400">Restaurante Asador Búa Chaval</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-white mt-1">
+          Plano de Sala & Reservas
+        </h2>
+      </div>
+
+      <!-- Filtros de fecha, turno y botón reserva telefónica -->
+      <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+        <input type="date" id="admin-date" onchange="renderAdminDashboard()" class="bg-brand-surface border border-brand-border rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-brand-primary">
+        
+        <select id="admin-turn" onchange="renderAdminDashboard()" class="bg-brand-surface border border-brand-border rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-brand-primary cursor-pointer">
+          <option value="comida">Turno Comida</option>
+          <option value="cena">Turno Cena</option>
+        </select>
+
+        <button onclick="openManualBookingModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold rounded-xl transition-colors flex items-center gap-2 shadow-md">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+          </svg>
+          <span>Añadir por teléfono</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Métricas Rápidas de Ocupación -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 my-6">
+      <div class="bg-brand-surface p-4 rounded-xl border border-brand-border">
+        <span class="text-xs text-stone-400 font-medium">Reservas del turno</span>
+        <p id="stat-total-res" class="text-2xl font-bold text-white mt-1">0</p>
+      </div>
+      <div class="bg-brand-surface p-4 rounded-xl border border-brand-border">
+        <span class="text-xs text-stone-400 font-medium">Comensales totales</span>
+        <p id="stat-total-guests" class="text-2xl font-bold text-brand-primary mt-1">0</p>
+      </div>
+      <div class="bg-brand-surface p-4 rounded-xl border border-brand-border">
+        <span class="text-xs text-stone-400 font-medium">Mesas Ocupadas</span>
+        <p id="stat-occupied-tables" class="text-2xl font-bold text-brand-gold mt-1">0 / 12</p>
+      </div>
+      <div class="bg-brand-surface p-4 rounded-xl border border-brand-border">
+        <span class="text-xs text-stone-400 font-medium">Tronas en Uso</span>
+        <p id="stat-highchairs" class="text-2xl font-bold text-cyan-400 mt-1">0 / 2</p>
+      </div>
+    </div>
+
+    <!-- SECCIÓN PLANO DE SALA Y LISTA DE RESERVAS EN 2 COLUMNAS -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start">
+      
+      <!-- COLUMNA IZQUIERDA (7 Cols): PLANO REAL DEL RESTAURANTE (3 FILAS) -->
+      <div class="lg:col-span-7 bg-brand-surface rounded-2xl border border-brand-border p-5 sm:p-6 space-y-6">
+        
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h3 class="text-base font-bold text-white">Disposición de Sala (3 Filas de Mesas)</h3>
+            <p class="text-[11px] text-stone-400">Pulsa cualquier mesa para ver detalles o reasignarla</p>
+          </div>
+          <!-- Leyenda de colores -->
+          <div class="flex items-center gap-3 text-[11px]">
+            <span class="flex items-center gap-1.5 text-emerald-400">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Libre
+            </span>
+            <span class="flex items-center gap-1.5 text-red-400">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Ocupada
+            </span>
+            <span class="flex items-center gap-1.5 text-amber-400">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Unida
+            </span>
+          </div>
+        </div>
+
+        <!-- CONTENEDOR SALA DE COMEDOR -->
+        <div class="p-5 bg-brand-charcoal rounded-xl border border-brand-border space-y-7 relative">
+          
+          <!-- Indicador Dirección Barra / Entrada -->
+          <div class="flex items-center justify-between text-[10px] text-stone-500 font-bold uppercase tracking-widest border-b border-brand-border pb-2">
+            <span>Zona Entrada / Barra</span>
+            <span>Comedor Fondo / Neón</span>
+          </div>
+
+          <!-- ========================= -->
+          <!-- FILA 1: Mesas 11, 12, 13, 14 -->
+          <!-- ========================= -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs text-stone-300 font-semibold">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded bg-brand-primary"></span>
+                <span>FILA 1 (Mesas 11 a 14)</span>
+              </span>
+              <span class="text-[10px] text-stone-500">11, 12, 13 (4-5p) · 14 (2-3p)</span>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-2.5" id="row-1-tables">
+              <!-- Renderizado dinámico de mesas 11, 12, 13, 14 -->
+            </div>
+          </div>
+
+          <!-- ========================= -->
+          <!-- FILA 2: Mesas 21, 22, 23, 24 -->
+          <!-- ========================= -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs text-stone-300 font-semibold">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded bg-brand-secondary"></span>
+                <span>FILA 2 (Mesas 21 a 24)</span>
+              </span>
+              <span class="text-[10px] text-stone-500">21, 22, 23 (2-3p) · 24 (6p flexible)</span>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-2.5" id="row-2-tables">
+              <!-- Renderizado dinámico de mesas 21, 22, 23, 24 -->
+            </div>
+          </div>
+
+          <!-- ========================= -->
+          <!-- FILA 3: Mesas 31, 32, 33, 34 -->
+          <!-- ========================= -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs text-stone-300 font-semibold">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded bg-brand-gold"></span>
+                <span>FILA 3 (Mesas 31 a 34)</span>
+              </span>
+              <span class="text-[10px] text-stone-500">31 (8p) · 32 (2-3p) · 33 (4-5p) · 34 (8p)</span>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-2.5" id="row-3-tables">
+              <!-- Renderizado dinámico de mesas 31, 32, 33, 34 -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- COLUMNA DERECHA (5 Cols): LISTADO DE RESERVAS DEL TURNO -->
+      <div class="lg:col-span-5 bg-brand-surface rounded-2xl border border-brand-border p-5 sm:p-6 space-y-4">
+        
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-bold text-white">Reservas del Turno</h3>
+          <span id="badge-count-res" class="text-xs bg-stone-900 border border-brand-border text-stone-300 px-2.5 py-0.5 rounded-full font-bold">0</span>
+        </div>
+
+        <!-- Contenedor scroll de reservas -->
+        <div id="reservations-list" class="space-y-3 max-h-[580px] overflow-y-auto pr-1">
+          <!-- Renderizado dinámico de tarjetas de reserva -->
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Modal Detalle Mesa / Reasignación -->
+    <div id="table-detail-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-brand-surface border border-brand-border max-w-md w-full rounded-2xl p-6 space-y-5 text-left shadow-2xl">
+        <div class="flex items-center justify-between border-b border-brand-border pb-3">
+          <h4 id="td-modal-title" class="text-base font-bold text-white">Detalle de Mesa</h4>
+          <button onclick="closeTableDetailModal()" class="text-stone-400 hover:text-white text-lg font-bold">
+            ✕
+          </button>
+        </div>
+        <div id="td-modal-content" class="text-xs sm:text-sm space-y-3 text-stone-300">
+          <!-- Rellenado dinámico -->
+        </div>
+        <button onclick="closeTableDetailModal()" class="w-full py-2.5 bg-stone-800 hover:bg-stone-700 text-white rounded-xl text-xs font-bold transition-colors">
+          Cerrar
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL AUTENTICACIÓN ADMIN -->
+  <div id="admin-auth-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-brand-surface border border-brand-border max-w-sm w-full rounded-2xl p-6 space-y-5 text-center shadow-2xl">
+      <div class="w-12 h-12 rounded-xl bg-brand-primary/15 border border-brand-primary/30 text-brand-primary flex items-center justify-center mx-auto">
+        <svg class="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-white">Acceso al Panel de Sala</h3>
+        <p class="text-xs text-stone-400 mt-1">Introduce el PIN de seguridad del restaurante</p>
+      </div>
+      <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+        <input type="password" id="admin-pin-input" placeholder="PIN (1234)" maxlength="8" autofocus class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-4 py-3 text-center text-white tracking-widest text-lg font-bold focus:outline-none focus:border-brand-primary">
+        <p id="pin-error" class="text-xs text-red-400 hidden">PIN incorrecto. (PIN de prueba: 1234)</p>
+        <div class="flex gap-2">
+          <button type="button" onclick="closeAdminAuth()" class="w-1/2 py-2.5 bg-stone-800 text-stone-300 text-xs font-bold rounded-xl hover:bg-stone-700">
+            Cancelar
+          </button>
+          <button type="submit" class="w-1/2 py-2.5 bg-brand-primary text-white text-xs font-bold rounded-xl hover:bg-brand-primaryHover">
+            Entrar
+          </button>
+        </div>
+      </form>
+      <p class="text-[11px] text-stone-500">PIN por defecto: <strong class="text-stone-300">1234</strong></p>
+    </div>
+  </div>
+
+  <!-- MODAL AÑADIR RESERVA MANUAL POR TELÉFONO -->
+  <div id="manual-booking-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-brand-surface border border-brand-border max-w-md w-full rounded-2xl p-6 space-y-4 text-left shadow-2xl">
+      <div class="flex items-center justify-between border-b border-brand-border pb-3">
+        <h4 class="text-base font-bold text-white flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+          </svg>
+          <span>Añadir Reserva por Teléfono</span>
+        </h4>
+        <button onclick="closeManualBookingModal()" class="text-stone-400 hover:text-white text-lg font-bold">
+          ✕
+        </button>
+      </div>
+      <form onsubmit="handleManualBookingSubmit(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block text-stone-300 font-bold mb-1 uppercase tracking-wider text-[11px]">Nombre Cliente</label>
+          <input type="text" id="mb-name" required placeholder="Ej: Marcos Pérez" class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-3 py-2 text-white">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-stone-300 font-bold mb-1 uppercase tracking-wider text-[11px]">Teléfono</label>
+            <input type="tel" id="mb-phone" required placeholder="654 321 000" class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-stone-300 font-bold mb-1 uppercase tracking-wider text-[11px]">Nº Comensales</label>
+            <input type="number" id="mb-guests" min="1" max="25" value="4" required class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-3 py-2 text-white font-bold">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-stone-300 font-bold mb-1 uppercase tracking-wider text-[11px]">Hora</label>
+            <select id="mb-time" class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-3 py-2 text-white">
+              <!-- Rellenado dinámicamente -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-stone-300 font-bold mb-1 uppercase tracking-wider text-[11px]">Tronas (Máx 2)</label>
+            <select id="mb-highchairs" class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-3 py-2 text-white">
+              <option value="0">0 Tronas</option>
+              <option value="1">1 Trona</option>
+              <option value="2">2 Tronas</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-stone-300 font-bold mb-1 uppercase tracking-wider text-[11px]">Mesa (Auto o Manual)</label>
+          <select id="mb-table-select" class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-3 py-2 text-white">
+            <option value="auto">⚡ Asignación Automática Inteligente</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-stone-300 font-bold mb-1 uppercase tracking-wider text-[11px]">Notas / Peticiones</label>
+          <input type="text" id="mb-notes" placeholder="Cumpleaños, cachopo encargado..." class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-3 py-2 text-white">
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeManualBookingModal()" class="w-1/2 py-2.5 bg-stone-800 text-stone-300 rounded-xl font-bold">Cancelar</button>
+          <button type="submit" class="w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold">Guardar Reserva</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- SCRIPT LOGIC (TOTALMENTE LIMPIO DE FUENTES LIGATURES)   -->
+  <!-- ======================================================= -->
+  <script>
+    /* 1. DEFINICIÓN EXACTA DE LAS 12 MESAS Y SUS 3 FILAS */
+    const TABLES_LAYOUT = [
+      // FILA 1
+      { id: 11, row: 1, baseCapacity: 4, maxCapacity: 5, type: '4-5p', label: 'Mesa 11' },
+      { id: 12, row: 1, baseCapacity: 4, maxCapacity: 5, type: '4-5p', label: 'Mesa 12' },
+      { id: 13, row: 1, baseCapacity: 4, maxCapacity: 5, type: '4-5p', label: 'Mesa 13' },
+      { id: 14, row: 1, baseCapacity: 2, maxCapacity: 3, type: '2-3p', label: 'Mesa 14' },
+
+      // FILA 2
+      { id: 21, row: 2, baseCapacity: 2, maxCapacity: 3, type: '2-3p', label: 'Mesa 21' },
+      { id: 22, row: 2, baseCapacity: 2, maxCapacity: 3, type: '2-3p', label: 'Mesa 22' },
+      { id: 23, row: 2, baseCapacity: 2, maxCapacity: 3, type: '2-3p', label: 'Mesa 23' },
+      { id: 24, row: 2, baseCapacity: 6, maxCapacity: 6, type: '6p', label: 'Mesa 24', flexible: true },
+
+      // FILA 3
+      { id: 31, row: 3, baseCapacity: 8, maxCapacity: 8, type: '8p', label: 'Mesa 31' },
+      { id: 32, row: 3, baseCapacity: 2, maxCapacity: 3, type: '2-3p', label: 'Mesa 32' },
+      { id: 33, row: 3, baseCapacity: 4, maxCapacity: 5, type: '4-5p', label: 'Mesa 33' },
+      { id: 34, row: 3, baseCapacity: 8, maxCapacity: 8, type: '8p', label: 'Mesa 34' },
+    ];
+
+    /* CÁLCULO REALISTA DE CAPACIDAD DE MESAS UNIDAS (CON LAS 2 PUNTAS) */
+    function getCombinedTableCapacity(tableIds) {
+      if (!tableIds || tableIds.length === 0) return 0;
+      if (tableIds.length === 1) {
+        const t = TABLES_LAYOUT.find(x => x.id === tableIds[0]);
+        return t ? t.maxCapacity : 0;
+      }
+
+      // Laterales útiles al unir mesas en hilera:
+      // Mesa 2-3p: 2 laterales (1 a cada lado)
+      // Mesa 4-5p: 4 laterales (2 a cada lado)
+      // Mesa 6p (24): 4 laterales
+      // Mesa 8p (31, 34): 6 laterales
+      let sideCapacity = 0;
+      tableIds.forEach(id => {
+        const t = TABLES_LAYOUT.find(x => x.id === id);
+        if (!t) return;
+        if (t.type === '2-3p') sideCapacity += 2;
+        else if (t.type === '4-5p') sideCapacity += 4;
+        else if (t.type === '6p') sideCapacity += 4;
+        else if (t.type === '8p') sideCapacity += 6;
+      });
+
+      // Más las 2 puntas (cabeceras libres al unir mesas en línea)
+      const puntas = 2;
+      return sideCapacity + puntas;
+    }
+
+    const TOTAL_HIGHCHAIRS = 2; // Exactamente 2 tronas en el restaurante
+
+    /* 2. INTERVALOS HORARIOS CADA 15 MINUTOS */
+    const TIME_SLOTS = {
+      comida: [
+        '13:00', '13:15', '13:30', '13:45',
+        '14:00', '14:15', '14:30', '14:45',
+        '15:00', '15:15', '15:30', '15:45'
+      ],
+      cena: [
+        '20:00', '20:15', '20:30', '20:45',
+        '21:00', '21:15', '21:30', '21:45',
+        '22:00', '22:15', '22:30', '22:45'
+      ]
+    };
+
+    /* 3. PERSISTENCIA EN LOCALSTORAGE */
+    const STORAGE_KEY = 'buachaval_reservations_v5';
+
+    function getTodayString() {
+      const today = new Date();
+      return today.toISOString().split('T')[0];
+    }
+
+    function initReservations() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      const today = getTodayString();
+      const initial = [
+        // 14:00 tiene 2 parejas (Mesa 22 y Mesa 23) -> Queda hueco para 1 mesa más de 2/3
+        {
+          id: 'RES-101',
+          name: 'David & Ana',
+          phone: '645 89 21 00',
+          email: '',
+          date: today,
+          turn: 'comida',
+          time: '14:00',
+          guests: 2,
+          tables: [22],
+          highchairs: 0,
+          notes: '',
+          status: 'confirmada'
+        },
+        {
+          id: 'RES-102',
+          name: 'Pareja López',
+          phone: '622 33 44 55',
+          email: '',
+          date: today,
+          turn: 'comida',
+          time: '14:00',
+          guests: 2,
+          tables: [23],
+          highchairs: 0,
+          notes: '',
+          status: 'confirmada'
+        },
+        // 14:15 tiene 2 mesas de 4/5 (Mesa 33 y Mesa 24) -> 14:15 Bloqueada para mesas 4/5
+        {
+          id: 'RES-103',
+          name: 'Familia Gómez',
+          phone: '633 45 67 89',
+          email: '',
+          date: today,
+          turn: 'comida',
+          time: '14:15',
+          guests: 4,
+          tables: [33],
+          highchairs: 0,
+          notes: '',
+          status: 'confirmada'
+        },
+        {
+          id: 'RES-104',
+          name: 'Familia Costa',
+          phone: '644 55 66 77',
+          email: '',
+          date: today,
+          turn: 'comida',
+          time: '14:15',
+          guests: 5,
+          tables: [24],
+          highchairs: 0,
+          notes: '',
+          status: 'confirmada'
+        },
+        // 14:30 tiene 1 mesa de 8 (Mesa 34) -> Bloqueada para grandes y 4/5
+        {
+          id: 'RES-105',
+          name: 'Grupo Utebo',
+          phone: '655 66 77 88',
+          email: '',
+          date: today,
+          turn: 'comida',
+          time: '14:30',
+          guests: 8,
+          tables: [34],
+          highchairs: 0,
+          notes: 'Van a pedir chuletones y cachopo XL',
+          status: 'confirmada'
+        }
+      ];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+      return initial;
+    }
+
+    let allReservations = initReservations();
+
+    function saveReservations() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(allReservations));
+    }
+
+    /* 4. CÁLCULO DE TRONAS EN TIEMPO REAL */
+    function getHighchairsUsed(date, turn, excludeResId = null) {
+      const activeRes = allReservations.filter(r => 
+        r.date === date && 
+        r.turn === turn && 
+        r.status !== 'cancelada' &&
+        r.id !== excludeResId
+      );
+      return activeRes.reduce((acc, r) => acc + (parseInt(r.highchairs) || 0), 0);
+    }
+
+    function updateHighchairsUI() {
+      const date = document.getElementById('res-date').value;
+      const turn = document.getElementById('res-turn').value;
+      const currentSelected = parseInt(document.getElementById('res-highchairs').value) || 0;
+
+      const used = getHighchairsUsed(date, turn);
+      const remaining = Math.max(0, TOTAL_HIGHCHAIRS - used);
+
+      const statusText = document.getElementById('highchair-status-text');
+      const btn1 = document.getElementById('hc-btn-1');
+      const btn2 = document.getElementById('hc-btn-2');
+
+      if (remaining === 0) {
+        statusText.innerHTML = `<span class="text-amber-400 font-semibold">⚠️ Tronas agotadas para este turno (${used}/2 en uso).</span>`;
+        btn1.disabled = true;
+        btn1.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-stone-600 bg-stone-900 cursor-not-allowed';
+        btn2.disabled = true;
+        btn2.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-stone-600 bg-stone-900 cursor-not-allowed';
+        selectHighchairs(0);
+      } else if (remaining === 1) {
+        statusText.innerHTML = `<span class="text-stone-300">Queda <strong class="text-white">1 trona disponible</strong> para este turno.</span>`;
+        btn1.disabled = false;
+        btn2.disabled = true;
+        btn2.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-stone-600 bg-stone-900 cursor-not-allowed';
+        if (currentSelected > 1) selectHighchairs(1);
+      } else {
+        statusText.innerHTML = `Disponibles <strong class="text-white">2 tronas</strong> para este turno.`;
+        btn1.disabled = false;
+        btn2.disabled = false;
+      }
+    }
+
+    function selectHighchairs(count) {
+      document.getElementById('res-highchairs').value = count;
+      const btn0 = document.getElementById('hc-btn-0');
+      const btn1 = document.getElementById('hc-btn-1');
+      const btn2 = document.getElementById('hc-btn-2');
+
+      const activeClass = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-brand-primary text-white shadow-sm transition-all';
+      const inactiveClass = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-stone-300 hover:text-white transition-all';
+
+      btn0.className = count === 0 ? activeClass : inactiveClass;
+      if (!btn1.disabled) btn1.className = count === 1 ? activeClass : inactiveClass;
+      if (!btn2.disabled) btn2.className = count === 2 ? activeClass : inactiveClass;
+    }
+
+    /* 5. CONTROL DE ENTRADAS SIMULTÁNEAS Y ESCALONAMIENTO DE COCINA */
+    function isTimeSlotAvailable(date, turn, time, guests, excludeResId = null) {
+      if (!time) return false;
+
+      // 1. Reservas activas para la misma fecha, turno y EXACTA HORA
+      const sameTimeRes = allReservations.filter(r => 
+        r.date === date && 
+        r.turn === turn && 
+        r.time === time && 
+        r.status !== 'cancelada' &&
+        r.id !== excludeResId
+      );
+
+      // Clasificación de reservas en este tramo horario:
+      const megaCount = sameTimeRes.filter(r => r.guests >= 11).length;               // >10 pax
+      const eightCount = sameTimeRes.filter(r => r.guests >= 7 && r.guests <= 10).length; // 7-10 pax (mesas de 8)
+      const mediumCount = sameTimeRes.filter(r => r.guests >= 4 && r.guests <= 6).length; // 4-6 pax (mesas de 4/5)
+      const smallCount = sameTimeRes.filter(r => r.guests <= 3).length;                // 1-3 pax (mesas de 2/3)
+
+      // REGLAS ESTRICTAS DE ENTRADA A LA MISMA HORA:
+
+      // Regla 1: Grupos de más de 10 personas (>10 pax)
+      // Solo 1 mesa grande a la misma hora, sin sobrecarga simultánea
+      if (guests >= 11) {
+        if (megaCount >= 1 || eightCount >= 1 || mediumCount >= 1 || smallCount >= 2) {
+          return false;
+        }
+      } 
+      // Regla 2: Mesas de 8 personas (7 a 10 pax)
+      // "Con las de 8 pues esa y otra de 2 o 3" (máx 1 de 8 y máx 1 de 2/3)
+      else if (guests >= 7 && guests <= 10) {
+        if (megaCount >= 1 || eightCount >= 1 || mediumCount >= 1 || smallCount >= 2) {
+          return false;
+        }
+      } 
+      // Regla 3: Mesas de 4 o 5 personas (4 a 6 pax)
+      // "2 mesas de 4/5": máx 2 mesas a esa hora. Bloqueada si hay de 8 o grande
+      else if (guests >= 4 && guests <= 6) {
+        if (megaCount >= 1 || eightCount >= 1) {
+          return false;
+        }
+        if (mediumCount >= 2) {
+          return false; // Cupo de 2 mesas completado para esta hora
+        }
+        if (mediumCount >= 1 && smallCount >= 2) {
+          return false;
+        }
+      } 
+      // Regla 4: Mesas de 2 o 3 personas (1 a 3 pax)
+      // "Hasta por ejemplo 3 mesas de 2 o 3"
+      // Y si hay una de 8: solo 1 mesa de 2/3 adicional
+      else {
+        if (megaCount >= 1) {
+          return false;
+        }
+        if (eightCount >= 1) {
+          if (smallCount >= 1) return false;
+        }
+        if (mediumCount >= 2 && smallCount >= 1) {
+          return false;
+        }
+        if (smallCount >= 3) {
+          return false; // Cupo de 3 mesas de 2/3 completado
+        }
+      }
+
+      return true;
+    }
+
+    /* 6. ALGORITMO INTELIGENTE DE ASIGNACIÓN Y UNIÓN DE MESAS */
+    function findBestTableAllocation(date, turn, guests) {
+      const activeReservations = allReservations.filter(r => r.date === date && r.turn === turn && r.status !== 'cancelada');
+      const occupiedTableIds = new Set();
+      activeReservations.forEach(r => {
+        r.tables.forEach(tid => occupiedTableIds.add(tid));
+      });
+
+      const freeTables = TABLES_LAYOUT.filter(t => !occupiedTableIds.has(t.id));
+
+      // Caso A: 1 a 2 comensales -> Mesa de 2-3p
+      if (guests <= 2) {
+        const t2 = freeTables.find(t => t.type === '2-3p');
+        if (t2) return [t2.id];
+        const t4 = freeTables.find(t => t.type === '4-5p');
+        if (t4) return [t4.id];
+      }
+
+      // Caso B: 3 comensales -> Mesa de 2-3p o 4-5p
+      if (guests === 3) {
+        const t3 = freeTables.find(t => t.type === '2-3p' && t.maxCapacity >= 3);
+        if (t3) return [t3.id];
+        const t4 = freeTables.find(t => t.type === '4-5p');
+        if (t4) return [t4.id];
+      }
+
+      // Caso C: 4 comensales -> Mesa de 4-5p (11, 12, 13, 33) o 24
+      if (guests === 4) {
+        const t4 = freeTables.find(t => t.type === '4-5p');
+        if (t4) return [t4.id];
+        const t24 = freeTables.find(t => t.id === 24);
+        if (t24) return [24];
+        const t8 = freeTables.find(t => t.type === '8p');
+        if (t8) return [t8.id];
+      }
+
+      // Caso D: 5 comensales -> Mesa 4-5p o mesa 24
+      if (guests === 5) {
+        const t5 = freeTables.find(t => t.type === '4-5p' && t.maxCapacity >= 5);
+        if (t5) return [t5.id];
+        const t24 = freeTables.find(t => t.id === 24);
+        if (t24) return [24];
+        const t8 = freeTables.find(t => t.type === '8p');
+        if (t8) return [t8.id];
+      }
+
+      // Caso E: 6 comensales -> Mesa 24 primero, luego 31 o 34
+      if (guests === 6) {
+        const t24 = freeTables.find(t => t.id === 24);
+        if (t24) return [24];
+        const t8 = freeTables.find(t => t.type === '8p');
+        if (t8) return [t8.id];
+      }
+
+      // Caso F: 7 a 8 comensales -> Mesas 31 o 34 (8p)
+      if (guests >= 7 && guests <= 8) {
+        const t8 = freeTables.find(t => t.type === '8p');
+        if (t8) return [t8.id];
+      }
+
+      // =============================================================
+      // UNIONES INTELIGENTES PARA GRUPOS (>= 7 pax)
+      // ESTRATEGIA DE SALA: ¡NO MALGASTAR MESAS DE 4/5 SI UNA DE 2/3 CUBRE EL HUECO!
+      // (Dos mesas de 4 dan 8 laterales + 2 puntas = 10; si falta 1 o 2 huecos,
+      //  se une UNA mesa de 2 como la 14 o la 21, reservando la otra de 4 para otra familia)
+      // =============================================================
+
+      const isFree = (id) => !occupiedTableIds.has(id);
+      const allAreFree = (ids) => ids.every(id => isFree(id));
+      const candidateCombos = [];
+
+      // 1. Grupos de 7 a 10 pax:
+      // Dos mesas de 4-5 con puntas dan 10 pax (11+12 o 12+13)
+      if (guests <= 10) {
+        if (allAreFree([11, 12])) candidateCombos.push([11, 12]);
+        if (allAreFree([12, 13])) candidateCombos.push([12, 13]);
+        if (allAreFree([31, 32])) candidateCombos.push([31, 32]);
+        if (allAreFree([34, 32])) candidateCombos.push([34, 32]);
+        if (allAreFree([21, 22, 23])) candidateCombos.push([21, 22, 23]);
+      }
+
+      // 2. Grupos de 11 a 12 pax (EL CASO DEL CLIENTE):
+      // Dos de 4-5 dan 10 con puntas. Falta 1 o 2 huecos -> Se añade UNA mesa de 2 (14, 21, 22, 23, 32)!
+      // NUNCA gastar una 3ª mesa de 4-5 si hay una pequeña libre!
+      if (guests >= 9 && guests <= 12) {
+        // En la misma Fila 1: 11 + 12 + 14 (o 12 + 13 + 14) -> deja Mesa 13 (4-5p) LIBRE!
+        if (allAreFree([11, 12, 14])) candidateCombos.push([11, 12, 14]);
+        if (allAreFree([12, 13, 14])) candidateCombos.push([12, 13, 14]);
+        // Si 14 está ocupada, unir con mesas de 2 de la Fila 2 (21, 22, 23):
+        if (allAreFree([11, 12, 21])) candidateCombos.push([11, 12, 21]);
+        if (allAreFree([12, 13, 21])) candidateCombos.push([12, 13, 21]);
+        if (allAreFree([11, 12, 22])) candidateCombos.push([11, 12, 22]);
+        if (allAreFree([12, 13, 22])) candidateCombos.push([12, 13, 22]);
+        if (allAreFree([11, 12, 23])) candidateCombos.push([11, 12, 23]);
+        if (allAreFree([12, 13, 23])) candidateCombos.push([12, 13, 23]);
+        // Fila 3: Mesa 31 (8p) + Mesa 32 (2p) = 11 pax con puntas
+        if (allAreFree([31, 32])) candidateCombos.push([31, 32]);
+        if (allAreFree([34, 32])) candidateCombos.push([34, 32]);
+        if (allAreFree([31, 14])) candidateCombos.push([31, 14]);
+        if (allAreFree([34, 14])) candidateCombos.push([34, 14]);
+        // Mesa 8p + Mesa 4-5p (31 + 33 o 34 + 33) = 13 pax
+        if (allAreFree([31, 33])) candidateCombos.push([31, 33]);
+        if (allAreFree([34, 33])) candidateCombos.push([34, 33]);
+        // Como último recurso si no quedan mesas de 2: tres mesas de 4-5
+        if (allAreFree([11, 12, 13])) candidateCombos.push([11, 12, 13]);
+      }
+
+      // 3. Grupos de 13 a 15 pax:
+      if (guests >= 11 && guests <= 15) {
+        if (allAreFree([31, 33])) candidateCombos.push([31, 33]);
+        if (allAreFree([34, 33])) candidateCombos.push([34, 33]);
+        if (allAreFree([11, 12, 13])) candidateCombos.push([11, 12, 13]);
+        if (allAreFree([11, 12, 13, 14])) candidateCombos.push([11, 12, 13, 14]);
+        if (allAreFree([31, 33, 32])) candidateCombos.push([31, 33, 32]);
+        if (allAreFree([34, 33, 32])) candidateCombos.push([34, 33, 32]);
+        if (allAreFree([31, 34])) candidateCombos.push([31, 34]);
+      }
+
+      // 4. Grupos de 16 a 25 pax:
+      if (guests >= 14) {
+        if (allAreFree([11, 12, 13, 14])) candidateCombos.push([11, 12, 13, 14]);
+        if (allAreFree([31, 34, 33])) candidateCombos.push([31, 34, 33]);
+        if (allAreFree([31, 34, 32])) candidateCombos.push([31, 34, 32]);
+        if (allAreFree([11, 12, 13, 14, 21])) candidateCombos.push([11, 12, 13, 14, 21]);
+        if (allAreFree([11, 12, 13, 14, 21, 22])) candidateCombos.push([11, 12, 13, 14, 21, 22]);
+      }
+
+      // Evaluar la lista de combinaciones candidatas
+      for (const combo of candidateCombos) {
+        const cap = getCombinedTableCapacity(combo);
+        if (cap >= guests) {
+          return combo;
+        }
+      }
+
+      // BÚSQUEDA DINÁMICA DE RESPALDO (Si no encajó en las preferentes):
+      const free2p = freeTables.filter(t => t.type === '2-3p').map(t => t.id);
+      const free4p = freeTables.filter(t => t.type === '4-5p').map(t => t.id);
+      const free8p = freeTables.filter(t => t.type === '8p').map(t => t.id);
+
+      // Probar 2 mesas de 4 + mesas de 2 (ahorrando mesas de 4)
+      if (free4p.length >= 2 && free2p.length >= 1) {
+        const tryCombo = [free4p[0], free4p[1], free2p[0]];
+        if (getCombinedTableCapacity(tryCombo) >= guests) return tryCombo;
+      }
+      if (free4p.length >= 2 && free2p.length >= 2) {
+        const tryCombo = [free4p[0], free4p[1], free2p[0], free2p[1]];
+        if (getCombinedTableCapacity(tryCombo) >= guests) return tryCombo;
+      }
+      if (free8p.length >= 1 && free2p.length >= 1) {
+        const tryCombo = [free8p[0], free2p[0]];
+        if (getCombinedTableCapacity(tryCombo) >= guests) return tryCombo;
+      }
+      if (free8p.length >= 1 && free4p.length >= 1) {
+        const tryCombo = [free8p[0], free4p[0]];
+        if (getCombinedTableCapacity(tryCombo) >= guests) return tryCombo;
+      }
+
+      // Por último, si se requiere toda la fila
+      const freeRow1 = freeTables.filter(t => t.row === 1).map(t => t.id);
+      if (getCombinedTableCapacity(freeRow1) >= guests) return freeRow1;
+
+      const freeRow3 = freeTables.filter(t => t.row === 3).map(t => t.id);
+      if (getCombinedTableCapacity(freeRow3) >= guests) return freeRow3;
+
+      const freeRow2 = freeTables.filter(t => t.row === 2).map(t => t.id);
+      if (getCombinedTableCapacity(freeRow2) >= guests) return freeRow2;
+
+      return null;
+    }
+
+    /* 7. HORARIOS CADA 15 MIN CON CONTROL DE ENTRADAS */
+    function renderTimeSlots() {
+      const turn = document.getElementById('res-turn').value;
+      const date = document.getElementById('res-date').value;
+      const guests = parseInt(document.getElementById('res-guests').value) || 2;
+      const container = document.getElementById('time-slots-container');
+      const label = document.getElementById('turn-hours-label');
+      container.innerHTML = '';
+
+      const slots = TIME_SLOTS[turn] || [];
+      label.innerText = turn === 'comida' ? '13:00 a 15:45 (Mediodía)' : '20:00 a 22:45 (Cena)';
+
+      // Horas con cupo disponible para este número de comensales
+      const availableSlots = slots.filter(time => isTimeSlotAvailable(date, turn, time, guests));
+
+      let currentSelected = document.getElementById('res-time').value;
+      // Si la hora seleccionada ya no está disponible, seleccionar la primera hora libre
+      if (!currentSelected || !availableSlots.includes(currentSelected)) {
+        currentSelected = availableSlots[0] || '';
+        document.getElementById('res-time').value = currentSelected;
+      }
+
+      slots.forEach(time => {
+        const isAvail = isTimeSlotAvailable(date, turn, time, guests);
+        const isSelected = isAvail && currentSelected === time;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+
+        if (isAvail) {
+          btn.className = `py-2 px-2.5 rounded-xl text-xs font-semibold transition-all border ${
+            isSelected 
+              ? 'bg-brand-primary text-white border-brand-primary shadow-lg shadow-brand-primary/20 scale-[1.02]' 
+              : 'bg-brand-charcoal text-stone-300 border-brand-border hover:border-stone-500 hover:text-white'
+          }`;
+          btn.innerText = time;
+          btn.onclick = () => selectTime(time);
+        } else {
+          // Bloqueada: tachada y no seleccionable
+          btn.disabled = true;
+          btn.className = 'py-2 px-2.5 rounded-xl text-xs font-medium bg-stone-900/40 text-stone-600 border border-stone-800/60 cursor-not-allowed opacity-40 line-through select-none pointer-events-none';
+          btn.innerText = time;
+          btn.title = 'Horario completo para este tipo de reserva';
+        }
+
+        container.appendChild(btn);
+      });
+    }
+
+    function selectTime(time) {
+      document.getElementById('res-time').value = time;
+      renderTimeSlots();
+      checkAvailabilityPreview();
+    }
+
+    function adjustGuests(delta) {
+      const input = document.getElementById('res-guests');
+      let val = parseInt(input.value) || 2;
+      val = Math.max(1, Math.min(25, val + delta));
+      input.value = val;
+      onDateOrTurnChange();
+    }
+
+    function onDateOrTurnChange() {
+      const guests = parseInt(document.getElementById('res-guests').value) || 2;
+      const groupNotice = document.getElementById('group-notice');
+      if (guests >= 6) {
+        groupNotice.classList.remove('hidden');
+      } else {
+        groupNotice.classList.add('hidden');
+      }
+
+      renderTimeSlots();
+      updateHighchairsUI();
+      checkAvailabilityPreview();
+    }
+
+    function checkAvailabilityPreview() {
+      const date = document.getElementById('res-date').value;
+      const turn = document.getElementById('res-turn').value;
+      const guests = parseInt(document.getElementById('res-guests').value) || 2;
+      const selectedTime = document.getElementById('res-time').value;
+
+      const dot = document.getElementById('avail-status-dot');
+      const title = document.getElementById('avail-title');
+      const sub = document.getElementById('avail-subtitle');
+      const btn = document.getElementById('submit-res-btn');
+      const noAvailBox = document.getElementById('no-availability-box');
+
+      if (!date) return;
+
+      const assigned = findBestTableAllocation(date, turn, guests);
+      const slots = TIME_SLOTS[turn] || [];
+      const anySlotAvailable = slots.some(time => isTimeSlotAvailable(date, turn, time, guests));
+
+      if (assigned && anySlotAvailable && selectedTime) {
+        dot.className = 'w-3.5 h-3.5 rounded-full bg-emerald-500 shrink-0';
+        title.innerText = 'Disponibilidad en sala confirmada';
+        title.className = 'text-sm font-semibold text-white';
+        if (assigned.length > 1) {
+          const cap = getCombinedTableCapacity(assigned);
+          sub.innerText = `Mesas optimizadas: ${assigned.map(id => 'Mesa ' + id).join(' + ')} (Unidas con puntas: hasta ${cap} personas a las ${selectedTime} h).`;
+        } else {
+          sub.innerText = `Mesa óptima asignada: Mesa #${assigned[0]} (Capacidad idónea a las ${selectedTime} h).`;
+        }
+        btn.disabled = false;
+        btn.className = 'w-full py-4 bg-brand-primary hover:bg-brand-primaryHover text-white font-bold text-sm sm:text-base uppercase tracking-wider rounded-xl shadow-xl shadow-brand-primary/20 transition-all flex items-center justify-center gap-2 cursor-pointer';
+        btn.innerHTML = '<span>Confirmar Reserva de Mesa</span>';
+        noAvailBox.classList.add('hidden');
+      } else {
+        dot.className = 'w-3.5 h-3.5 rounded-full bg-red-500 shrink-0';
+        title.innerText = 'Sin disponibilidad para este grupo en este turno';
+        title.className = 'text-sm font-semibold text-red-400';
+        sub.innerText = anySlotAvailable 
+          ? 'El restaurante está al completo para esa franja horaria.'
+          : 'Se han completado los cupos de entrada para este grupo en este turno.';
+        btn.disabled = true;
+        btn.className = 'w-full py-4 bg-stone-800 text-stone-500 font-bold text-sm sm:text-base uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 cursor-not-allowed opacity-60';
+        btn.innerHTML = '<span>Sin disponibilidad para este turno</span>';
+        noAvailBox.classList.remove('hidden');
+      }
+    }
+
+    function handleReservationSubmit(e) {
+      e.preventDefault();
+      const date = document.getElementById('res-date').value;
+      const turn = document.getElementById('res-turn').value;
+      const time = document.getElementById('res-time').value;
+      const guests = parseInt(document.getElementById('res-guests').value) || 2;
+      const highchairs = parseInt(document.getElementById('res-highchairs').value) || 0;
+      const name = document.getElementById('res-name').value.trim();
+      const phone = document.getElementById('res-phone').value.trim();
+      const email = document.getElementById('res-email').value.trim();
+      const notes = document.getElementById('res-notes').value.trim();
+
+      const tables = findBestTableAllocation(date, turn, guests);
+      if (!tables) {
+        alert('No hay mesas disponibles para ese número de comensales. Por favor, llámanos al 624 28 29 93.');
+        return;
+      }
+
+      if (!isTimeSlotAvailable(date, turn, time, guests)) {
+        alert('Esa hora se acaba de completar para este tamaño de grupo. Por favor, selecciona otro intervalo de 15 minutos.');
+        renderTimeSlots();
+        checkAvailabilityPreview();
+        return;
+      }
+
+      if (highchairs > 0) {
+        const used = getHighchairsUsed(date, turn);
+        if (used + highchairs > TOTAL_HIGHCHAIRS) {
+          alert('Lo sentimos, las tronas acaban de ser reservadas para este turno. Por favor, selecciona 0 tronas o llámanos.');
+          updateHighchairsUI();
+          return;
+        }
+      }
+
+      const newRes = {
+        id: 'RES-' + Math.floor(1000 + Math.random() * 9000),
+        name,
+        phone,
+        email,
+        date,
+        turn,
+        time,
+        guests,
+        tables,
+        highchairs,
+        notes,
+        status: 'confirmada',
+        createdAt: new Date().toISOString()
+      };
+
+      allReservations.push(newRes);
+      saveReservations();
+
+      // Modal de éxito
+      const summaryDiv = document.getElementById('modal-summary');
+      const capTotal = getCombinedTableCapacity(tables);
+      const tableString = tables.length > 1 
+        ? `Mesas Unidas ${tables.map(t => '#' + t).join(' + ')} (Con puntas, hasta ${capTotal} pax)` 
+        : `Mesa #${tables[0]}`;
+
+      summaryDiv.innerHTML = `
+        <div class="flex justify-between border-b border-brand-border pb-2">
+          <span class="text-stone-400">Referencia:</span>
+          <span class="font-bold text-white">${newRes.id}</span>
+        </div>
+        <div class="flex justify-between border-b border-brand-border pb-2">
+          <span class="text-stone-400">Titular:</span>
+          <span class="font-medium text-white">${newRes.name}</span>
+        </div>
+        <div class="flex justify-between border-b border-brand-border pb-2">
+          <span class="text-stone-400">Fecha y Hora:</span>
+          <span class="font-medium text-brand-secondary">${newRes.date} a las ${newRes.time} h</span>
+        </div>
+        <div class="flex justify-between border-b border-brand-border pb-2">
+          <span class="text-stone-400">Comensales:</span>
+          <span class="font-bold text-white">${newRes.guests} personas</span>
+        </div>
+        <div class="flex justify-between border-b border-brand-border pb-2">
+          <span class="text-stone-400">Mesa(s) en sala:</span>
+          <span class="font-bold text-brand-primary">${tableString}</span>
+        </div>
+        <div class="flex justify-between border-b border-brand-border pb-2">
+          <span class="text-stone-400">Tronas reservadas:</span>
+          <span class="font-semibold ${newRes.highchairs > 0 ? 'text-brand-gold' : 'text-stone-400'}">
+            ${newRes.highchairs > 0 ? `${newRes.highchairs} trona(s) garantizada(s)` : 'Ninguna'}
+          </span>
+        </div>
+        ${newRes.notes ? `<div class="pt-2 text-xs text-stone-400 italic">Petición: "${newRes.notes}"</div>` : ''}
+      `;
+
+      document.getElementById('success-modal').classList.remove('hidden');
+      document.getElementById('reservation-form').reset();
+      document.getElementById('res-date').value = date;
+      renderTimeSlots();
+      updateHighchairsUI();
+      checkAvailabilityPreview();
+    }
+
+    function closeSuccessModal() {
+      document.getElementById('success-modal').classList.add('hidden');
+    }
+
+    /* 7. PANEL DE ADMINISTRADOR */
+    function renderAdminDashboard() {
+      const date = document.getElementById('admin-date').value;
+      const turn = document.getElementById('admin-turn').value;
+
+      const activeRes = allReservations.filter(r => r.date === date && r.turn === turn && r.status !== 'cancelada');
+
+      const tableOccupation = {};
+      activeRes.forEach(r => {
+        r.tables.forEach(tid => {
+          tableOccupation[tid] = r;
+        });
+      });
+
+      renderRowTables('row-1-tables', [11, 12, 13, 14], tableOccupation);
+      renderRowTables('row-2-tables', [21, 22, 23, 24], tableOccupation);
+      renderRowTables('row-3-tables', [31, 32, 33, 34], tableOccupation);
+
+      renderReservationsList(activeRes);
+
+      const totalGuests = activeRes.reduce((acc, r) => acc + r.guests, 0);
+      const highchairsUsed = activeRes.reduce((acc, r) => acc + (parseInt(r.highchairs) || 0), 0);
+      const occupiedCount = Object.keys(tableOccupation).length;
+
+      document.getElementById('stat-total-res').innerText = activeRes.length;
+      document.getElementById('stat-total-guests').innerText = totalGuests;
+      document.getElementById('stat-occupied-tables').innerText = `${occupiedCount} / 12`;
+      document.getElementById('stat-highchairs').innerText = `${highchairsUsed} / ${TOTAL_HIGHCHAIRS}`;
+    }
+
+    function renderRowTables(containerId, tableIds, tableOccupation) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+
+      tableIds.forEach(id => {
+        const tableDef = TABLES_LAYOUT.find(t => t.id === id);
+        const res = tableOccupation[id];
+        const isOccupied = !!res;
+        const isJoined = isOccupied && res.tables.length > 1;
+
+        let statusBg = 'bg-brand-surface border-brand-border hover:border-emerald-500/70';
+        let statusColor = 'text-emerald-400';
+        let statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">LIBRE</span>`;
+
+        if (isJoined) {
+          statusBg = 'bg-amber-950/30 border-amber-500/60 shadow-lg shadow-amber-950/20';
+          statusColor = 'text-amber-300';
+          statusBadge = `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">🔗 UNIDA</span>`;
+        } else if (isOccupied) {
+          statusBg = 'bg-red-950/30 border-red-500/50 shadow-lg shadow-red-950/20';
+          statusColor = 'text-red-400';
+          statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-300 border border-red-500/40">OCUPADA</span>`;
+        }
+
+        const el = document.createElement('div');
+        el.className = `p-3 rounded-xl border transition-all cursor-pointer select-none flex flex-col justify-between h-28 ${statusBg}`;
+        el.onclick = () => openTableDetail(id, res);
+
+        el.innerHTML = `
+          <div class="flex items-start justify-between">
+            <span class="font-bold text-sm text-white">${tableDef.label}</span>
+            ${statusBadge}
+          </div>
+          
+          <div class="text-[11px] text-stone-400 space-y-0.5">
+            <div class="font-medium">
+              ${tableDef.baseCapacity}${tableDef.maxCapacity > tableDef.baseCapacity ? '-' + tableDef.maxCapacity : ''} pax
+            </div>
+            ${isOccupied 
+              ? `<p class="font-semibold text-white truncate text-[11px]">${res.name.split(' ')[0]} (${res.guests}p)${res.highchairs > 0 ? ' 👶' : ''}</p>` 
+              : `<p class="text-stone-500 text-[10px]">Disponible</p>`}
+          </div>
+
+          <div class="text-[10px] ${statusColor} font-semibold flex items-center justify-between border-t border-stone-800/80 pt-1">
+            <span>${isOccupied ? res.time + 'h' : 'Listo'}</span>
+            ${isJoined ? `<span class="text-stone-400 text-[9px]">con ${res.tables.filter(x => x !== id).map(x => '#' + x).join(',')}</span>` : ''}
+          </div>
+        `;
+
+        container.appendChild(el);
+      });
+    }
+
+    function renderReservationsList(reservations) {
+      const container = document.getElementById('reservations-list');
+      const badge = document.getElementById('badge-count-res');
+      badge.innerText = reservations.length;
+      container.innerHTML = '';
+
+      if (reservations.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 text-stone-500 text-xs">
+            No hay reservas para este turno y fecha.
+          </div>
+        `;
+        return;
+      }
+
+      const sorted = [...reservations].sort((a, b) => a.time.localeCompare(b.time));
+
+      sorted.forEach(r => {
+        const isJoined = r.tables.length > 1;
+        const tableTag = isJoined 
+          ? `<span class="text-amber-400 font-bold bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">Unidas: ${r.tables.map(t => '#' + t).join(' + ')}</span>`
+          : `<span class="text-brand-primary font-bold bg-brand-primary/10 px-2 py-0.5 rounded border border-brand-primary/20">Mesa #${r.tables[0]}</span>`;
+
+        const highchairBadge = r.highchairs > 0 
+          ? `<span class="px-2 py-0.5 rounded bg-brand-gold/15 text-brand-gold font-bold text-[10px] border border-brand-gold/30">👶 ${r.highchairs} Trona${r.highchairs > 1 ? 's' : ''}</span>`
+          : '';
+
+        const card = document.createElement('div');
+        card.className = 'bg-brand-charcoal border border-brand-border hover:border-stone-700 p-4 rounded-xl space-y-2 transition-all text-xs';
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-white text-sm">${r.name}</span>
+              <span class="text-stone-500">·</span>
+              <span class="text-brand-secondary font-semibold">${r.guests} personas</span>
+            </div>
+            <span class="text-stone-300 font-bold bg-stone-900 border border-brand-border px-2 py-1 rounded text-[11px]">${r.time} h</span>
+          </div>
+
+          <div class="flex items-center justify-between text-stone-400 text-[11px] flex-wrap gap-1">
+            <div class="flex items-center gap-1.5">
+              <span>📞</span>
+              <a href="tel:${r.phone}" class="hover:underline text-stone-300">${r.phone}</a>
+            </div>
+            <div class="flex items-center gap-1.5">
+              ${highchairBadge}
+              ${tableTag}
+            </div>
+          </div>
+
+          ${r.notes ? `<div class="bg-brand-surface p-2 rounded text-[11px] text-stone-400 italic">"${r.notes}"</div>` : ''}
+
+          <div class="flex items-center justify-between pt-2 border-t border-brand-border">
+            <span class="text-[10px] text-stone-500 uppercase tracking-wider">Ref: ${r.id}</span>
+            <div class="flex items-center gap-3">
+              <button onclick="reassignTable('${r.id}')" class="text-stone-400 hover:text-brand-secondary text-[11px] font-semibold">
+                ⇄ Cambiar mesa
+              </button>
+              <button onclick="cancelReservation('${r.id}')" class="text-red-400 hover:text-red-300 text-[11px] font-semibold">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openTableDetail(tableId, res) {
+      const tableDef = TABLES_LAYOUT.find(t => t.id === tableId);
+      const modal = document.getElementById('table-detail-modal');
+      const title = document.getElementById('td-modal-title');
+      const content = document.getElementById('td-modal-content');
+
+      title.innerText = `${tableDef.label} (Fila ${tableDef.row})`;
+
+      if (res) {
+        content.innerHTML = `
+          <div class="p-3 bg-brand-charcoal rounded-xl space-y-2 border border-brand-border">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-stone-400">Estado:</span>
+              <span class="font-bold text-red-400">RESERVADA / OCUPADA</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-stone-400 text-xs">Cliente:</span>
+              <span class="font-bold text-white">${res.name}</span>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-stone-400">Hora:</span>
+              <span class="font-semibold text-brand-secondary">${res.time} h</span>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-stone-400">Comensales:</span>
+              <span class="font-bold text-white">${res.guests} personas</span>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-stone-400">Tronas:</span>
+              <span class="font-bold text-brand-gold">${res.highchairs || 0} trona(s)</span>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-stone-400">Teléfono:</span>
+              <span class="text-stone-200">${res.phone}</span>
+            </div>
+            ${res.tables.length > 1 ? `
+              <div class="p-2 bg-amber-950/40 rounded border border-amber-500/30 text-xs text-amber-300">
+                ⚠️ Mesa unida junto a: ${res.tables.filter(id => id !== tableId).map(id => 'Mesa ' + id).join(', ')}
+              </div>
+            ` : ''}
+          </div>
+          <div class="pt-2">
+            <button onclick="reassignTable('${res.id}')" class="w-full py-2 bg-brand-primary text-white rounded-lg text-xs font-bold hover:bg-brand-primaryHover">
+              Reasignar a otra mesa
+            </button>
+          </div>
+        `;
+      } else {
+        content.innerHTML = `
+          <div class="p-4 bg-brand-charcoal rounded-xl text-center space-y-2 border border-brand-border">
+            <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
+              ✓
+            </div>
+            <h5 class="font-bold text-white text-sm">Mesa Disponible</h5>
+            <p class="text-xs text-stone-400">Capacidad para ${tableDef.baseCapacity}${tableDef.maxCapacity > tableDef.baseCapacity ? ' a ' + tableDef.maxCapacity : ''} personas.</p>
+            <div class="text-[11px] text-stone-500 pt-1">
+              Fila ${tableDef.row} · Lista para cualquier comensal o para unirse en grupo.
+            </div>
+          </div>
+        `;
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeTableDetailModal() {
+      document.getElementById('table-detail-modal').classList.add('hidden');
+    }
+
+    function cancelReservation(resId) {
+      if (!confirm('¿Seguro que deseas cancelar esta reserva?')) return;
+      const idx = allReservations.findIndex(r => r.id === resId);
+      if (idx !== -1) {
+        allReservations[idx].status = 'cancelada';
+        saveReservations();
+        renderAdminDashboard();
+        updateHighchairsUI();
+        checkAvailabilityPreview();
+      }
+    }
+
+    function reassignTable(resId) {
+      closeTableDetailModal();
+      const res = allReservations.find(r => r.id === resId);
+      if (!res) return;
+
+      const freeTableIds = TABLES_LAYOUT.filter(t => {
+        const activeRes = allReservations.filter(x => x.date === res.date && x.turn === res.turn && x.id !== res.id && x.status !== 'cancelada');
+        return !activeRes.some(x => x.tables.includes(t.id));
+      }).map(t => t.id);
+
+      const promptMsg = `Reasignar reserva de ${res.name} (${res.guests} comensales):\nMesas libres: ${freeTableIds.join(', ')}\n\nIntroduce el número de mesa (o varias separadas por coma, ej: 11, 12):`;
+      const input = prompt(promptMsg, res.tables.join(', '));
+      if (!input) return;
+
+      const newTables = input.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+      if (newTables.length === 0) {
+        alert('Número de mesa no válido');
+        return;
+      }
+
+      res.tables = newTables;
+      saveReservations();
+      renderAdminDashboard();
+      checkAvailabilityPreview();
+      alert(`Mesa(s) reasignada(s) con éxito: ${newTables.join(', ')}`);
+    }
+
+    /* 8. MODAL RESERVA MANUAL POR TELÉFONO */
+    function openManualBookingModal() {
+      const turn = document.getElementById('admin-turn').value;
+      const date = document.getElementById('admin-date').value;
+      const guests = parseInt(document.getElementById('mb-guests').value) || 4;
+      const timeSelect = document.getElementById('mb-time');
+      timeSelect.innerHTML = '';
+      const slots = TIME_SLOTS[turn] || [];
+      slots.forEach(s => {
+        const isAvail = isTimeSlotAvailable(date, turn, s, guests);
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.innerText = isAvail ? `${s} h` : `${s} h (⚠️ Lleno web)`;
+        timeSelect.appendChild(opt);
+      });
+
+      const tableSelect = document.getElementById('mb-table-select');
+      tableSelect.innerHTML = '<option value="auto">⚡ Asignación Automática Inteligente</option>';
+      TABLES_LAYOUT.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.innerText = `${t.label} (Fila ${t.row} · ${t.baseCapacity}-${t.maxCapacity}p)`;
+        tableSelect.appendChild(opt);
+      });
+
+      document.getElementById('manual-booking-modal').classList.remove('hidden');
+    }
+
+    function closeManualBookingModal() {
+      document.getElementById('manual-booking-modal').classList.add('hidden');
+    }
+
+    function handleManualBookingSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('mb-name').value.trim();
+      const phone = document.getElementById('mb-phone').value.trim();
+      const guests = parseInt(document.getElementById('mb-guests').value) || 2;
+      const time = document.getElementById('mb-time').value;
+      const highchairs = parseInt(document.getElementById('mb-highchairs').value) || 0;
+      const notes = document.getElementById('mb-notes').value.trim();
+      const tableChoice = document.getElementById('mb-table-select').value;
+
+      const date = document.getElementById('admin-date').value;
+      const turn = document.getElementById('admin-turn').value;
+
+      let tables = [];
+      if (tableChoice === 'auto') {
+        tables = findBestTableAllocation(date, turn, guests);
+        if (!tables) {
+          alert('No hay mesas disponibles automáticamente para ' + guests + ' personas.');
+          return;
+        }
+      } else {
+        tables = [parseInt(tableChoice)];
+      }
+
+      const newRes = {
+        id: 'TEL-' + Math.floor(1000 + Math.random() * 9000),
+        name: name + ' (Tfno)',
+        phone,
+        email: '',
+        date,
+        turn,
+        time,
+        guests,
+        tables,
+        highchairs,
+        notes: notes ? notes + ' [Por teléfono]' : '[Por teléfono]',
+        status: 'confirmada',
+        createdAt: new Date().toISOString()
+      };
+
+      allReservations.push(newRes);
+      saveReservations();
+      closeManualBookingModal();
+      renderAdminDashboard();
+      updateHighchairsUI();
+      checkAvailabilityPreview();
+      alert('Reserva telefónica guardada con éxito en ' + tables.map(t => 'Mesa ' + t).join(' + '));
+    }
+
+    /* 9. NAVEGACIÓN Y ACCESO ADMIN */
+    let isAdminUnlocked = false;
+
+    function switchView(view) {
+      const clientView = document.getElementById('client-view');
+      const adminView = document.getElementById('admin-view');
+      const clientBtn = document.getElementById('nav-client-btn');
+      const adminBtn = document.getElementById('nav-admin-btn');
+
+      if (view === 'client') {
+        clientView.classList.remove('hidden');
+        adminView.classList.add('hidden');
+        clientBtn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 bg-brand-primary text-white shadow-md';
+        adminBtn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 text-stone-400 hover:text-white';
+      } else if (view === 'admin') {
+        clientView.classList.add('hidden');
+        adminView.classList.remove('hidden');
+        adminBtn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 bg-brand-primary text-white shadow-md';
+        clientBtn.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 text-stone-400 hover:text-white';
+        renderAdminDashboard();
+      }
+    }
+
+    function openAdminAuth() {
+      if (isAdminUnlocked) {
+        switchView('admin');
+      } else {
+        document.getElementById('admin-pin-input').value = '';
+        document.getElementById('pin-error').classList.add('hidden');
+        document.getElementById('admin-auth-modal').classList.remove('hidden');
+      }
+    }
+
+    function closeAdminAuth() {
+      document.getElementById('admin-auth-modal').classList.add('hidden');
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const pin = document.getElementById('admin-pin-input').value;
+      if (pin === '1234') {
+        isAdminUnlocked = true;
+        closeAdminAuth();
+        switchView('admin');
+      } else {
+        document.getElementById('pin-error').classList.remove('hidden');
+      }
+    }
+
+    /* 10. INICIALIZACIÓN */
+    window.addEventListener('DOMContentLoaded', () => {
+      const today = getTodayString();
+      document.getElementById('res-date').value = today;
+      document.getElementById('res-date').min = today;
+      document.getElementById('admin-date').value = today;
+
+      renderTimeSlots();
+      updateHighchairsUI();
+      checkAvailabilityPreview();
+    });
+  </script>
+
+</body>
+</html>
