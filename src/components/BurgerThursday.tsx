@@ -111,12 +111,12 @@ export default function BurgerThursday() {
                   Hamburguesa Asada
                 </h3>
                 <p className="text-xs uppercase tracking-wider text-[#a1d1b8] font-semibold mt-1">
-                  Hamburguesa Mixta + Carne Asada Braseada
+                  Hamburguesa Mixta + Carne Asada
                 </p>
               </div>
 
               <p className="text-sm text-[#dec0b7] leading-relaxed">
-                El homenaje definitivo al asador: jugosa hamburguesa mixta combinada con tiernos trozos de carne asada al fuego, fundente queso gouda y salsa ahumada.
+                El homenaje definitivo al asador: jugosa hamburguesa mixta combinada con tierna carne asada, fundente queso gouda y salsa ahumada.
               </p>
 
               {/* Lista de ingredientes */}
@@ -131,7 +131,7 @@ export default function BurgerThursday() {
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0" />
-                    <span>Auténtica <strong>carne asada</strong> braseada</span>
+                    <span>Tierna <strong>carne asada</strong></span>
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0" />
