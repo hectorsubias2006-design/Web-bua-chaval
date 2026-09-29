@@ -577,8 +577,8 @@
         <p class="text-xs text-stone-400 mt-1">Introduce el PIN de seguridad del restaurante</p>
       </div>
       <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-        <input type="password" id="admin-pin-input" placeholder="PIN (1234)" maxlength="8" autofocus class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-4 py-3 text-center text-white tracking-widest text-lg font-bold focus:outline-none focus:border-brand-primary">
-        <p id="pin-error" class="text-xs text-red-400 hidden">PIN incorrecto. (PIN de prueba: 1234)</p>
+        <input type="password" id="admin-pin-input" placeholder="Introduce el PIN de seguridad" maxlength="8" autofocus class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-4 py-3 text-center text-white tracking-widest text-lg font-bold focus:outline-none focus:border-brand-primary">
+        <p id="pin-error" class="text-xs text-red-400 hidden">PIN incorrecto.</p>
         <div class="flex gap-2">
           <button type="button" onclick="closeAdminAuth()" class="w-1/2 py-2.5 bg-stone-800 text-stone-300 text-xs font-bold rounded-xl hover:bg-stone-700">
             Cancelar
@@ -588,7 +588,6 @@
           </button>
         </div>
       </form>
-      <p class="text-[11px] text-stone-500">PIN por defecto: <strong class="text-stone-300">1234</strong></p>
     </div>
   </div>
 
@@ -2111,7 +2110,7 @@
     function handleAdminLogin(e) {
       e.preventDefault();
       const pin = document.getElementById('admin-pin-input').value;
-      if (pin === '1234') {
+      if (pin === '7312') {
         isAdminUnlocked = true;
         closeAdminAuth();
         switchView('admin');
