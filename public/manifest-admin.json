@@ -1,0 +1,18 @@
+{
+  "name": "Búa Chaval - Panel Restaurante",
+  "short_name": "Búa Chaval Admin",
+  "description": "Gestión en tiempo real de reservas y mesas de Búa Chaval",
+  "start_url": "/admin-buachaval.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#121110",
+  "theme_color": "#E58A2B",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

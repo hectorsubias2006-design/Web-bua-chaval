@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Búa Chaval | App Restaurante</title>
+  
+  <!-- PWA & Mobile Web App Meta Tags -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#121110">
+  <link rel="manifest" href="/manifest-admin.json">
+  <link rel="icon" href="/logo.png">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDKs (v10 compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              charcoal: '#121110',
+              surface: '#1A1816',
+              surfaceLight: '#24201C',
+              border: '#332E29',
+              primary: '#E58A2B',
+              primaryHover: '#C9741F',
+              secondary: '#E85D3B',
+              gold: '#F59E0B'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0E0D0C;
+      color: #F5F5F4;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    input, select, textarea {
+      font-size: 16px !important; /* Evita zoom automático en iPhone/Android */
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col pb-24 select-none">
+
+  <!-- ========================================== -->
+  <!-- 🔒 PANTALLA DE BLOQUEO POR PIN PRIVADO     -->
+  <!-- ========================================== -->
+  <div id="pin-lock-screen" class="fixed inset-0 z-50 bg-[#0E0D0C] flex flex-col items-center justify-center p-6 text-center">
+    <div class="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-3xl mb-4 shadow-xl">
+      🥩
+    </div>
+    <h1 class="text-2xl font-extrabold text-white tracking-wide">Búa Chaval Staff</h1>
+    <p class="text-xs text-stone-400 mt-1 max-w-xs">App exclusiva del restaurante. Introduce el PIN de administrador para acceder.</p>
+    
+    <form onsubmit="handlePinSubmit(event)" class="mt-6 w-full max-w-xs space-y-4">
+      <div>
+        <input type="password" id="pin-input" inputmode="numeric" maxlength="6" placeholder="Introduce el PIN (1234)" autofocus
+               class="w-full text-center text-2xl font-bold tracking-widest bg-brand-surface border-2 border-brand-border rounded-xl py-3 text-white focus:outline-none focus:border-brand-primary placeholder:text-stone-600 placeholder:text-sm placeholder:tracking-normal">
+        <p id="pin-error-msg" class="text-xs text-red-400 mt-2 font-semibold hidden">⚠️ PIN incorrecto</p>
+      </div>
+
+      <div class="flex items-center justify-center gap-2 text-xs text-stone-400">
+        <input type="checkbox" id="remember-device" class="rounded bg-stone-800 border-brand-border text-brand-primary focus:ring-0">
+        <label for="remember-device">Recordar este móvil (entrar siempre directo)</label>
+      </div>
+
+      <button type="submit" class="w-full py-3.5 bg-brand-primary hover:bg-brand-primaryHover text-white font-bold rounded-xl shadow-lg transition-all text-sm tracking-wide">
+        Entrar al Panel
+      </button>
+    </form>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 📱 CABECERA PRINCIPAL DE LA APP RESTAURANTE -->
+  <!-- ========================================== -->
+  <header class="bg-brand-surface border-b border-brand-border px-4 py-3 sticky top-0 z-30 shadow-md">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl">🥩</span>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-sm text-white tracking-wide">BÚA CHAVAL</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-brand-primary/20 text-brand-primary font-bold">STAFF</span>
+          </div>
+          <!-- Estado Nube en tiempo real -->
+          <div class="flex items-center gap-1.5 mt-0.5">
+            <span id="app-cloud-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="app-cloud-text" class="text-[11px] font-semibold text-emerald-400">Nube Conectada</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="lockApp()" title="Bloquear app" class="w-8 h-8 rounded-lg bg-stone-800/80 border border-brand-border flex items-center justify-center text-xs text-stone-400 hover:text-white">
+          🔒
+        </button>
+      </div>
+    </div>
+
+    <!-- Barra de Control de Fecha y Turno -->
+    <div class="grid grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-brand-border/60">
+      <!-- Selector de Fecha -->
+      <div class="flex items-center bg-brand-charcoal border border-brand-border rounded-xl px-2.5 py-1.5">
+        <span class="text-xs mr-1.5">📅</span>
+        <input type="date" id="admin-date" onchange="onAdminFilterChange()" 
+               class="bg-transparent text-xs text-white font-medium focus:outline-none w-full">
+      </div>
+
+      <!-- Selector de Turno -->
+      <div class="grid grid-cols-2 bg-brand-charcoal border border-brand-border p-0.5 rounded-xl text-xs font-semibold">
+        <button type="button" id="turn-btn-comida" onclick="setAdminTurn('comida')"
+                class="py-1.5 rounded-lg text-center transition-all bg-brand-primary text-white shadow">
+          ☀️ Comida
+        </button>
+        <button type="button" id="turn-btn-cena" onclick="setAdminTurn('cena')"
+                class="py-1.5 rounded-lg text-center transition-all text-stone-400 hover:text-white">
+          🌙 Cena
+        </button>
+      </div>
+    </div>
+
+    <!-- Atajos Rápidos de Fecha: Hoy / Mañana -->
+    <div class="flex items-center gap-2 mt-2">
+      <button onclick="setDateToday()" class="px-2.5 py-1 rounded-md bg-stone-800/80 text-[11px] font-semibold text-stone-300 hover:text-white border border-brand-border">
+        Hoy
+      </button>
+      <button onclick="setDateTomorrow()" class="px-2.5 py-1 rounded-md bg-stone-800/80 text-[11px] font-semibold text-stone-300 hover:text-white border border-brand-border">
+        Mañana
+      </button>
+      <span id="date-display-label" class="text-[11px] text-stone-400 font-medium ml-auto"></span>
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- 📊 RESUMEN RÁPIDO DE SALA (KPIs)           -->
+  <!-- ========================================== -->
+  <section class="px-4 py-3 bg-brand-surfaceLight border-b border-brand-border">
+    <div class="grid grid-cols-4 gap-2 text-center">
+      <div class="p-2 rounded-xl bg-brand-surface border border-brand-border">
+        <span class="text-[10px] text-stone-400 font-semibold block uppercase">Reservas</span>
+        <span id="kpi-res" class="text-lg font-bold text-white">0</span>
+      </div>
+      <div class="p-2 rounded-xl bg-brand-surface border border-brand-border">
+        <span class="text-[10px] text-stone-400 font-semibold block uppercase">Personas</span>
+        <span id="kpi-guests" class="text-lg font-bold text-brand-primary">0</span>
+      </div>
+      <div class="p-2 rounded-xl bg-brand-surface border border-brand-border">
+        <span class="text-[10px] text-stone-400 font-semibold block uppercase">Mesas</span>
+        <span id="kpi-tables" class="text-lg font-bold text-emerald-400">0/12</span>
+      </div>
+      <div class="p-2 rounded-xl bg-brand-surface border border-brand-border">
+        <span class="text-[10px] text-stone-400 font-semibold block uppercase">Tronas</span>
+        <span id="kpi-highchairs" class="text-lg font-bold text-brand-gold">0/2</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- 🔘 PESTAÑAS: MAPA DE SALA VS LISTA         -->
+  <!-- ========================================== -->
+  <div class="px-4 pt-3 flex gap-2">
+    <button id="tab-btn-map" onclick="switchAppTab('map')"
+            class="flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 bg-brand-primary text-white shadow-md transition-all">
+      <span>🗺️ Mapa de Mesas (12)</span>
+    </button>
+    <button id="tab-btn-list" onclick="switchAppTab('list')"
+            class="flex-1 py-2.5 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 bg-brand-surface text-stone-400 border border-brand-border hover:text-white transition-all">
+      <span>📋 Lista de Turno</span>
+    </button>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 🗺️ VISTA 1: MAPA DE LAS 12 MESAS EN SALA   -->
+  <!-- ========================================== -->
+  <main id="view-map" class="px-4 py-3 space-y-4">
+    <!-- Fila 1 -->
+    <div class="space-y-1.5">
+      <div class="flex items-center justify-between text-[11px] text-stone-400 font-semibold px-1">
+        <span>FILA 1 (Ventanal / Entrada)</span>
+        <span>Mesas 11, 12, 13 (4p) · Mesa 14 (Punta 2p)</span>
+      </div>
+      <div id="row-1-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+    </div>
+
+    <!-- Fila 2 -->
+    <div class="space-y-1.5">
+      <div class="flex items-center justify-between text-[11px] text-stone-400 font-semibold px-1">
+        <span>FILA 2 (Centro)</span>
+        <span>Mesa 21 (Punta 2p) · Mesas 22, 23 (2p) · Mesa 24 (4p)</span>
+      </div>
+      <div id="row-2-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+    </div>
+
+    <!-- Fila 3 -->
+    <div class="space-y-1.5">
+      <div class="flex items-center justify-between text-[11px] text-stone-400 font-semibold px-1">
+        <span>FILA 3 (Fondo / Asador)</span>
+        <span>Mesas 31, 32, 33 (4p) · Mesa 34 (Fija 8p)</span>
+      </div>
+      <div id="row-3-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+    </div>
+
+    <!-- Leyenda rápida -->
+    <div class="flex items-center justify-center gap-4 text-[10px] text-stone-400 pt-2 pb-1 border-t border-brand-border/60">
+      <div class="flex items-center gap-1.5">
+        <span class="w-2.5 h-2.5 rounded bg-emerald-500"></span>
+        <span>Libre</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-2.5 h-2.5 rounded bg-red-600"></span>
+        <span>Ocupada</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-2.5 h-2.5 rounded bg-amber-500"></span>
+        <span>Mesas Unidas</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================== -->
+  <!-- 📋 VISTA 2: LISTA CRONOLÓGICA DE RESERVAS   -->
+  <!-- ========================================== -->
+  <main id="view-list" class="px-4 py-3 space-y-2 hidden">
+    <div id="reservations-list-container" class="space-y-2.5">
+      <!-- Se genera dinámicamente -->
+    </div>
+  </main>
+
+  <!-- ========================================== -->
+  <!-- ⚡ BOTÓN FLOTANTE GIGANTE: APUNTAR RESERVA -->
+  <!-- ========================================== -->
+  <div class="fixed bottom-4 left-4 right-4 z-40 max-w-lg mx-auto">
+    <button onclick="openBookingModal()"
+            class="w-full py-3.5 px-5 bg-gradient-to-r from-brand-primary to-brand-secondary hover:brightness-110 text-white font-extrabold text-sm rounded-2xl shadow-2xl flex items-center justify-center gap-2.5 border border-white/20 active:scale-95 transition-all">
+      <span class="text-lg">⚡</span>
+      <span>+ Apuntar Reserva (Teléfono / Sala)</span>
+    </button>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 📝 MODAL APUNTAR RESERVA RÁPIDA           -->
+  <!-- ========================================== -->
+  <div id="booking-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-brand-surface border border-brand-border w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-5 space-y-4 max-h-[92vh] overflow-y-auto shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-brand-border">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📞</span>
+          <h3 class="font-bold text-white text-base">Nueva Reserva Directa</h3>
+        </div>
+        <button onclick="closeBookingModal()" class="w-8 h-8 rounded-full bg-stone-800 text-stone-400 hover:text-white flex items-center justify-center">✕</button>
+      </div>
+
+      <form onsubmit="handleBookingSubmit(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-stone-300 mb-1">Nombre del cliente *</label>
+          <input type="text" id="bm-name" required placeholder="Ej: Carlos Martínez"
+                 class="w-full bg-brand-charcoal border border-brand-border rounded-xl p-3 text-white focus:outline-none focus:border-brand-primary">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-stone-300 mb-1">Teléfono</label>
+            <input type="tel" id="bm-phone" placeholder="600 00 00 00"
+                   class="w-full bg-brand-charcoal border border-brand-border rounded-xl p-3 text-white focus:outline-none focus:border-brand-primary">
+          </div>
+          <div>
+            <label class="block font-semibold text-stone-300 mb-1">Nº Comensales *</label>
+            <input type="number" id="bm-guests" min="1" max="25" value="4" required onchange="onGuestsOrTimeChange()"
+                   class="w-full bg-brand-charcoal border border-brand-border rounded-xl p-3 text-white font-bold focus:outline-none focus:border-brand-primary">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-stone-300 mb-1">Hora de llegada *</label>
+            <select id="bm-time" required class="w-full bg-brand-charcoal border border-brand-border rounded-xl p-3 text-white focus:outline-none focus:border-brand-primary font-semibold"></select>
+          </div>
+          <div>
+            <label class="block font-semibold text-stone-300 mb-1">Tronas (bebé)</label>
+            <select id="bm-highchairs" class="w-full bg-brand-charcoal border border-brand-border rounded-xl p-3 text-white focus:outline-none focus:border-brand-primary">
+              <option value="0">0 Tronas</option>
+              <option value="1">1 Trona</option>
+              <option value="2">2 Tronas</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-stone-300 mb-1">Asignación de Mesa</label>
+          <select id="bm-table" class="w-full bg-brand-charcoal border border-brand-border rounded-xl p-3 text-white focus:outline-none focus:border-brand-primary font-medium">
+            <option value="auto">⚡ Asignación Automática Inteligente</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-stone-300 mb-1">Petición / Notas</label>
+          <input type="text" id="bm-notes" placeholder="Ej: Van a pedir cachopo XL, vienen con carrito..."
+                 class="w-full bg-brand-charcoal border border-brand-border rounded-xl p-3 text-white focus:outline-none focus:border-brand-primary">
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="closeBookingModal()" class="flex-1 py-3 text-stone-400 font-semibold rounded-xl bg-stone-800">
+            Cancelar
+          </button>
+          <button type="submit" class="flex-1 py-3 bg-brand-primary hover:bg-brand-primaryHover text-white font-bold rounded-xl shadow-lg">
+            Guardar Reserva
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 🔍 MODAL DETALLE DE MESA Y CLIENTE         -->
+  <!-- ========================================== -->
+  <div id="table-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-brand-surface border border-brand-border w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-brand-border">
+        <h3 id="tm-title" class="font-bold text-white text-base">Detalle de Mesa</h3>
+        <button onclick="closeTableModal()" class="w-8 h-8 rounded-full bg-stone-800 text-stone-400 hover:text-white flex items-center justify-center">✕</button>
+      </div>
+
+      <div id="tm-body" class="space-y-3 text-xs">
+        <!-- Contenido dinámico -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- ⚙️ LÓGICA DE DATOS Y CONEXIÓN FIREBASE      -->
+  <!-- ========================================== -->
+  <script>
+    /* Credenciales oficiales de Firebase */
+    const firebaseConfig = {
+      apiKey: "AIzaSyCPogMW367qXD_F6zq4cUaTtPwyYpuZlGA",
+      authDomain: "buachaval-reservas.firebaseapp.com",
+      databaseURL: "https://buachaval-reservas-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "buachaval-reservas",
+      storageBucket: "buachaval-reservas.firebasestorage.app",
+      messagingSenderId: "548946783678",
+      appId: "1:548946783678:web:ccc6948300093126441def"
+    };
+
+    const TABLES = [
+      { id: 11, row: 1, base: 4, max: 5, label: 'Mesa 11' },
+      { id: 12, row: 1, base: 4, max: 5, label: 'Mesa 12' },
+      { id: 13, row: 1, base: 4, max: 5, label: 'Mesa 13' },
+      { id: 14, row: 1, base: 2, max: 3, label: 'Mesa 14 (Punta)' },
+
+      { id: 21, row: 2, base: 2, max: 3, label: 'Mesa 21 (Punta)' },
+      { id: 22, row: 2, base: 2, max: 3, label: 'Mesa 22' },
+      { id: 23, row: 2, base: 2, max: 3, label: 'Mesa 23' },
+      { id: 24, row: 2, base: 4, max: 5, label: 'Mesa 24' },
+
+      { id: 31, row: 3, base: 4, max: 5, label: 'Mesa 31' },
+      { id: 32, row: 3, base: 4, max: 5, label: 'Mesa 32' },
+      { id: 33, row: 3, base: 4, max: 5, label: 'Mesa 33' },
+      { id: 34, row: 3, base: 8, max: 8, label: 'Mesa 34 (8p)' }
+    ];
+
+    const SLOTS = {
+      comida: ['13:00','13:15','13:30','13:45','14:00','14:15','14:30','14:45','15:00','15:15','15:30','15:45'],
+      cena: ['20:00','20:15','20:30','20:45','21:00','21:15','21:30','21:45','22:00','22:15','22:30','22:45']
+    };
+
+    let allReservations = [];
+    let currentTurn = 'comida';
+    let firebaseDb = null;
+    let previousResCount = 0;
+
+    /* 1. SEGURIDAD Y PIN */
+    function checkDeviceAuth() {
+      const isSaved = localStorage.getItem('buachaval_admin_device_auth');
+      if (isSaved === 'true') {
+        document.getElementById('pin-lock-screen').classList.add('hidden');
+      }
+    }
+
+    function handlePinSubmit(e) {
+      e.preventDefault();
+      const pin = document.getElementById('pin-input').value;
+      if (pin === '1234') {
+        if (document.getElementById('remember-device').checked) {
+          localStorage.setItem('buachaval_admin_device_auth', 'true');
+        }
+        document.getElementById('pin-lock-screen').classList.add('hidden');
+      } else {
+        document.getElementById('pin-error-msg').classList.remove('hidden');
+      }
+    }
+
+    function lockApp() {
+      localStorage.removeItem('buachaval_admin_device_auth');
+      document.getElementById('pin-input').value = '';
+      document.getElementById('pin-lock-screen').classList.remove('hidden');
+    }
+
+    /* 2. INICIALIZACIÓN DE FIREBASE */
+    function initFirebase() {
+      try {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        firebaseDb = firebase.database();
+
+        firebaseDb.ref('reservas').on('value', (snapshot) => {
+          const val = snapshot.val();
+          if (val) {
+            const list = Array.isArray(val) ? val : Object.values(val);
+            
+            // Aviso sonoro y vibración si entra una reserva online nueva
+            if (previousResCount > 0 && list.length > previousResCount) {
+              const latest = list[list.length - 1];
+              playChimeAlert();
+              vibrateDevice();
+              showToastAlert(latest);
+            }
+            previousResCount = list.length;
+            allReservations = list;
+            renderAll();
+          }
+        });
+      } catch (err) {
+        console.error("Error Firebase:", err);
+      }
+    }
+
+    function playChimeAlert() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.15); // A5
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.6);
+      } catch (e) {}
+    }
+
+    function vibrateDevice() {
+      if ('vibrate' in navigator) {
+        navigator.vibrate([250, 100, 250]);
+      }
+    }
+
+    function showToastAlert(res) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-4 left-4 right-4 z-50 bg-stone-900 border-2 border-emerald-500 text-white p-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce';
+      toast.innerHTML = `
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl shrink-0">🔔</div>
+        <div class="truncate">
+          <div class="font-bold text-xs text-emerald-400">¡Nueva Reserva Online!</div>
+          <div class="text-xs text-stone-200 truncate">${res.name} (${res.guests} pax) · ${res.time}h</div>
+        </div>
+      `;
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.classList.remove('animate-bounce'); }, 1000);
+      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 400); }, 6000);
+    }
+
+    /* 3. FECHAS Y TURNOS */
+    function getTodayString() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    function setDateToday() {
+      document.getElementById('admin-date').value = getTodayString();
+      onAdminFilterChange();
+    }
+
+    function setDateTomorrow() {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      document.getElementById('admin-date').value = d.toISOString().split('T')[0];
+      onAdminFilterChange();
+    }
+
+    function setAdminTurn(turn) {
+      currentTurn = turn;
+      const bComida = document.getElementById('turn-btn-comida');
+      const bCena = document.getElementById('turn-btn-cena');
+      if (turn === 'comida') {
+        bComida.className = 'py-1.5 rounded-lg text-center transition-all bg-brand-primary text-white shadow';
+        bCena.className = 'py-1.5 rounded-lg text-center transition-all text-stone-400 hover:text-white';
+      } else {
+        bCena.className = 'py-1.5 rounded-lg text-center transition-all bg-brand-primary text-white shadow';
+        bComida.className = 'py-1.5 rounded-lg text-center transition-all text-stone-400 hover:text-white';
+      }
+      renderAll();
+    }
+
+    function onAdminFilterChange() {
+      const d = document.getElementById('admin-date').value;
+      const dateObj = new Date(d + 'T00:00:00');
+      const options = { weekday: 'short', day: 'numeric', month: 'short' };
+      document.getElementById('date-display-label').innerText = dateObj.toLocaleDateString('es-ES', options);
+      renderAll();
+    }
+
+    /* 4. RENDERIZADO */
+    function renderAll() {
+      const date = document.getElementById('admin-date').value;
+      const activeRes = allReservations.filter(r => r.date === date && r.turn === currentTurn && r.status !== 'cancelada');
+
+      // Mapa de ocupación
+      const tableOccupation = {};
+      activeRes.forEach(r => {
+        r.tables.forEach(tid => {
+          tableOccupation[tid] = r;
+        });
+      });
+
+      renderRowGrid('row-1-grid', [11, 12, 13, 14], tableOccupation);
+      renderRowGrid('row-2-grid', [21, 22, 23, 24], tableOccupation);
+      renderRowGrid('row-3-grid', [31, 32, 33, 34], tableOccupation);
+
+      // KPIs
+      document.getElementById('kpi-res').innerText = activeRes.length;
+      document.getElementById('kpi-guests').innerText = activeRes.reduce((acc, r) => acc + r.guests, 0);
+      document.getElementById('kpi-tables').innerText = `${Object.keys(tableOccupation).length}/12`;
+      document.getElementById('kpi-highchairs').innerText = `${activeRes.reduce((acc, r) => acc + (parseInt(r.highchairs) || 0), 0)}/2`;
+
+      // Lista
+      renderList(activeRes);
+    }
+
+    function renderRowGrid(containerId, tableIds, occ) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+
+      tableIds.forEach(id => {
+        const table = TABLES.find(t => t.id === id);
+        const res = occ[id];
+        const isOccupied = !!res;
+        const isJoined = isOccupied && res.tables.length > 1;
+
+        let bgClass = 'bg-brand-surface border-brand-border hover:border-emerald-500';
+        let statusBadge = '<span class="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/30">LIBRE</span>';
+
+        if (isJoined) {
+          bgClass = 'bg-amber-950/30 border-amber-500/60 shadow-lg';
+          statusBadge = '<span class="text-[9px] font-bold text-amber-300 bg-amber-500/20 px-1.5 py-0.5 rounded border border-amber-500/40">🔗 UNIDA</span>';
+        } else if (isOccupied) {
+          bgClass = 'bg-red-950/40 border-red-500/60 shadow-lg';
+          statusBadge = '<span class="text-[9px] font-bold text-red-300 bg-red-500/20 px-1.5 py-0.5 rounded border border-red-500/40">OCUPADA</span>';
+        }
+
+        const el = document.createElement('div');
+        el.className = `p-3 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between h-24 ${bgClass}`;
+        el.onclick = () => openTableDetail(id, res);
+
+        el.innerHTML = `
+          <div class="flex items-start justify-between">
+            <span class="font-extrabold text-sm text-white">${table.label.replace(' (Punta)', '').replace(' (8p)', '')}</span>
+            ${statusBadge}
+          </div>
+          <div class="text-[11px] truncate">
+            ${isOccupied 
+              ? `<span class="font-bold text-white block truncate">${res.name}</span>
+                 <span class="text-stone-300 text-[10px] font-semibold">${res.guests} pax · ${res.time}h ${res.highchairs > 0 ? '👶' : ''}</span>`
+              : `<span class="text-stone-500 text-[10px]">${table.base}${table.max > table.base ? '-'+table.max : ''} pax</span>`}
+          </div>
+          <div class="text-[9px] text-stone-400 flex justify-between border-t border-white/5 pt-1">
+            <span>Fila ${table.row}</span>
+            ${isJoined ? `<span class="text-amber-300 font-bold">+ con ${res.tables.filter(x => x !== id).map(x => '#' + x).join(',')}</span>` : ''}
+          </div>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    function renderList(resList) {
+      const container = document.getElementById('reservations-list-container');
+      container.innerHTML = '';
+
+      if (resList.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center text-stone-500 text-xs bg-brand-surface rounded-2xl border border-brand-border">
+            No hay reservas para este turno.
+          </div>
+        `;
+        return;
+      }
+
+      const sorted = [...resList].sort((a, b) => a.time.localeCompare(b.time));
+
+      sorted.forEach(res => {
+        const item = document.createElement('div');
+        item.className = 'p-3.5 bg-brand-surface border border-brand-border rounded-2xl flex items-center justify-between gap-3 shadow-md';
+        item.innerHTML = `
+          <div class="flex items-center gap-3 truncate">
+            <div class="w-12 h-12 rounded-xl bg-brand-charcoal border border-brand-border flex flex-col items-center justify-center shrink-0">
+              <span class="text-xs font-extrabold text-brand-primary">${res.time}</span>
+              <span class="text-[9px] text-stone-400">h</span>
+            </div>
+            <div class="truncate">
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-white text-xs truncate">${res.name}</span>
+                ${res.highchairs > 0 ? '<span class="text-xs" title="Trona">👶</span>' : ''}
+              </div>
+              <div class="text-[11px] text-stone-400">
+                <strong class="text-stone-200">${res.guests} pax</strong> · Mesas: <strong class="text-brand-primary">${res.tables.map(t => '#' + t).join(' + ')}</strong>
+              </div>
+              ${res.notes ? `<div class="text-[10px] text-stone-400 italic truncate mt-0.5">${res.notes}</div>` : ''}
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5 shrink-0">
+            ${res.phone ? `
+              <a href="tel:${res.phone}" class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-sm font-bold active:scale-95" title="Llamar">
+                📞
+              </a>` : ''}
+            <button onclick="cancelResPrompt('${res.id}')" class="w-9 h-9 rounded-xl bg-red-500/15 text-red-400 border border-red-500/30 flex items-center justify-center text-xs font-bold active:scale-95" title="Cancelar">
+              ✕
+            </button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function switchAppTab(tab) {
+      const vMap = document.getElementById('view-map');
+      const vList = document.getElementById('view-list');
+      const bMap = document.getElementById('tab-btn-map');
+      const bList = document.getElementById('tab-btn-list');
+
+      if (tab === 'map') {
+        vMap.classList.remove('hidden');
+        vList.classList.add('hidden');
+        bMap.className = 'flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 bg-brand-primary text-white shadow-md transition-all';
+        bList.className = 'flex-1 py-2.5 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 bg-brand-surface text-stone-400 border border-brand-border hover:text-white transition-all';
+      } else {
+        vMap.classList.add('hidden');
+        vList.classList.remove('hidden');
+        bList.className = 'flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 bg-brand-primary text-white shadow-md transition-all';
+        bMap.className = 'flex-1 py-2.5 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 bg-brand-surface text-stone-400 border border-brand-border hover:text-white transition-all';
+      }
+    }
+
+    /* 5. GESTIÓN DE RESERVA MANUAL (+ APUNTAR) */
+    function openBookingModal() {
+      const slots = SLOTS[currentTurn];
+      const sel = document.getElementById('bm-time');
+      sel.innerHTML = '';
+      slots.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.innerText = `${s} h`;
+        sel.appendChild(opt);
+      });
+
+      const tableSel = document.getElementById('bm-table');
+      tableSel.innerHTML = '<option value="auto">⚡ Asignación Inteligente Automática</option>';
+      TABLES.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.innerText = `${t.label} (${t.base}-${t.max}p)`;
+        tableSel.appendChild(opt);
+      });
+
+      document.getElementById('booking-modal').classList.remove('hidden');
+    }
+
+    function closeBookingModal() {
+      document.getElementById('booking-modal').classList.add('hidden');
+    }
+
+    function handleBookingSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('bm-name').value.trim();
+      const phone = document.getElementById('bm-phone').value.trim();
+      const guests = parseInt(document.getElementById('bm-guests').value) || 2;
+      const time = document.getElementById('bm-time').value;
+      const highchairs = parseInt(document.getElementById('bm-highchairs').value) || 0;
+      const notes = document.getElementById('bm-notes').value.trim();
+      const tableChoice = document.getElementById('bm-table').value;
+      const date = document.getElementById('admin-date').value;
+
+      let tables = [];
+      if (tableChoice === 'auto') {
+        tables = findSmartAllocation(date, currentTurn, guests);
+        if (!tables) {
+          alert(`No se encontró combinación de mesas libre para ${guests} comensales.`);
+          return;
+        }
+      } else {
+        tables = [parseInt(tableChoice)];
+      }
+
+      const newRes = {
+        id: 'STAFF-' + Math.floor(1000 + Math.random() * 9000),
+        name: name + ' (Tfno)',
+        phone,
+        email: '',
+        date,
+        turn: currentTurn,
+        time,
+        guests,
+        tables,
+        highchairs,
+        notes: notes ? notes + ' [Por teléfono]' : '[Por teléfono]',
+        status: 'confirmada',
+        createdAt: new Date().toISOString()
+      };
+
+      allReservations.push(newRes);
+      saveReservationsCloud();
+      closeBookingModal();
+      document.getElementById('bm-name').value = '';
+      document.getElementById('bm-phone').value = '';
+      document.getElementById('bm-notes').value = '';
+      alert(`✅ Reserva guardada con éxito en ${tables.map(t => 'Mesa ' + t).join(' + ')}`);
+    }
+
+    function findSmartAllocation(date, turn, guests) {
+      const activeRes = allReservations.filter(r => r.date === date && r.turn === turn && r.status !== 'cancelada');
+      const occupiedTables = new Set();
+      activeRes.forEach(r => r.tables.forEach(t => occupiedTables.add(t)));
+      const freeTables = TABLES.filter(t => !occupiedTables.has(t.id));
+
+      // 1. Mesa individual
+      const fitSingle = freeTables.filter(t => t.max >= guests).sort((a, b) => a.base - b.base);
+      if (fitSingle.length > 0) return [fitSingle[0].id];
+
+      // 2. Combinaciones prioritarias
+      const combos = [
+        [11, 12], [12, 13], [22, 23], [31, 32], [32, 33],
+        [11, 12, 14], [12, 13, 14], [21, 22, 23], [11, 12, 13, 14], [31, 32, 33]
+      ];
+      for (const c of combos) {
+        if (c.every(id => !occupiedTables.has(id))) {
+          const cap = c.reduce((sum, tid) => sum + (TABLES.find(t => t.id === tid)?.max || 0), 0);
+          if (cap >= guests) return c;
+        }
+      }
+      return null;
+    }
+
+    function saveReservationsCloud() {
+      if (firebaseDb) {
+        firebaseDb.ref('reservas').set(allReservations);
+      }
+      renderAll();
+    }
+
+    function cancelResPrompt(resId) {
+      if (!confirm('¿Seguro que deseas cancelar esta reserva?')) return;
+      const idx = allReservations.findIndex(r => r.id === resId);
+      if (idx !== -1) {
+        allReservations[idx].status = 'cancelada';
+        saveReservationsCloud();
+      }
+    }
+
+    function openTableDetail(tableId, res) {
+      const tmTitle = document.getElementById('tm-title');
+      const tmBody = document.getElementById('tm-body');
+      const table = TABLES.find(t => t.id === tableId);
+
+      tmTitle.innerText = `${table.label} (Fila ${table.row})`;
+
+      if (!res) {
+        tmBody.innerHTML = `
+          <div class="p-4 bg-emerald-950/20 border border-emerald-500/30 rounded-2xl text-center">
+            <span class="text-2xl block mb-1">🟢</span>
+            <span class="font-bold text-emerald-400 block text-sm">MESA DISPONIBLE</span>
+            <span class="text-stone-400 text-xs">Capacidad: ${table.base}-${table.max} personas</span>
+          </div>
+          <button onclick="openBookingModal(); document.getElementById('bm-table').value = ${tableId}; closeTableModal();" 
+                  class="w-full py-3 bg-brand-primary text-white font-bold rounded-xl text-xs">
+            + Apuntar Reserva en esta Mesa
+          </button>
+        `;
+      } else {
+        tmBody.innerHTML = `
+          <div class="p-3.5 bg-brand-charcoal border border-brand-border rounded-2xl space-y-2">
+            <div class="flex justify-between border-b border-brand-border pb-2">
+              <span class="text-stone-400">Titular:</span>
+              <span class="font-bold text-white text-sm">${res.name}</span>
+            </div>
+            <div class="flex justify-between border-b border-brand-border pb-2">
+              <span class="text-stone-400">Hora:</span>
+              <span class="font-bold text-brand-primary text-sm">${res.time} h</span>
+            </div>
+            <div class="flex justify-between border-b border-brand-border pb-2">
+              <span class="text-stone-400">Comensales:</span>
+              <span class="font-bold text-white">${res.guests} personas</span>
+            </div>
+            <div class="flex justify-between border-b border-brand-border pb-2">
+              <span class="text-stone-400">Mesas asignadas:</span>
+              <span class="font-bold text-brand-secondary">${res.tables.map(t => 'Mesa ' + t).join(' + ')}</span>
+            </div>
+            <div class="flex justify-between border-b border-brand-border pb-2">
+              <span class="text-stone-400">Tronas:</span>
+              <span class="font-bold ${res.highchairs > 0 ? 'text-brand-gold' : 'text-stone-400'}">${res.highchairs > 0 ? res.highchairs + ' trona(s)' : 'Ninguna'}</span>
+            </div>
+            ${res.phone ? `
+            <div class="flex justify-between items-center pt-1">
+              <span class="text-stone-400">Teléfono:</span>
+              <a href="tel:${res.phone}" class="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30 flex items-center gap-1.5">
+                📞 ${res.phone}
+              </a>
+            </div>` : ''}
+            ${res.notes ? `<div class="text-[11px] text-stone-400 italic pt-1 border-t border-brand-border">Nota: "${res.notes}"</div>` : ''}
+          </div>
+
+          <div class="flex gap-2 pt-2">
+            <button onclick="cancelResPrompt('${res.id}'); closeTableModal();" class="flex-1 py-2.5 bg-red-950/40 text-red-400 border border-red-500/40 font-bold rounded-xl text-xs">
+              Cancelar Reserva
+            </button>
+          </div>
+        `;
+      }
+
+      document.getElementById('table-modal').classList.remove('hidden');
+    }
+
+    function closeTableModal() {
+      document.getElementById('table-modal').classList.add('hidden');
+    }
+
+    /* 6. ARRANQUE */
+    window.addEventListener('DOMContentLoaded', () => {
+      checkDeviceAuth();
+      setDateToday();
+      initFirebase();
+    });
+  </script>
+</body>
+</html>
