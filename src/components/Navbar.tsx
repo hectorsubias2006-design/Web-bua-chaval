@@ -44,6 +44,19 @@ export default function Navbar() {
             Nuestra Carta
           </a>
           <a
+            href="#jueves-burger"
+            className="px-3.5 py-1.5 font-label-md text-label-md uppercase tracking-wider bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-lg font-bold transition-all flex items-center gap-2 shadow-sm"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+            </span>
+            <span>Los Jueves</span>
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-primary text-white tracking-widest uppercase shadow-sm">
+              NOVEDAD
+            </span>
+          </a>
+          <a
             href="#el-local"
             className="px-space-md py-space-sm font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors rounded-lg"
           >
@@ -104,6 +117,22 @@ export default function Navbar() {
               className="px-space-md py-space-sm font-label-md text-label-md uppercase tracking-wider bg-primary-container/10 text-primary font-medium rounded-lg"
             >
               Nuestra Carta
+            </a>
+            <a
+              href="#jueves-burger"
+              onClick={closeMenu}
+              className="px-space-md py-space-sm font-label-md text-label-md uppercase tracking-wider bg-primary/10 text-primary font-bold hover:bg-primary/20 rounded-lg flex items-center justify-between border border-primary/20"
+            >
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
+                <span>Los Jueves</span>
+              </div>
+              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-primary text-white tracking-wider">
+                NOVEDAD
+              </span>
             </a>
             <a
               href="#el-local"

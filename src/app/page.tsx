@@ -3,6 +3,7 @@ import Hero from '@/components/Hero';
 import About from '@/components/About';
 import GrillBanner from '@/components/GrillBanner';
 import FeaturedDishes from '@/components/FeaturedDishes';
+import BurgerThursday from '@/components/BurgerThursday';
 import MenuSection from '@/components/MenuSection';
 import SpaceFeatures from '@/components/SpaceFeatures';
 import Footer from '@/components/Footer';
@@ -17,6 +18,7 @@ export default function Home() {
           <About />
           <GrillBanner />
           <FeaturedDishes />
+          <BurgerThursday />
           <MenuSection />
           <SpaceFeatures />
           <Footer />
