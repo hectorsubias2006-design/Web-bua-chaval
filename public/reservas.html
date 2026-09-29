@@ -150,39 +150,84 @@
     <div class="bg-brand-surface rounded-2xl border border-brand-border shadow-2xl p-6 sm:p-10">
       <form id="reservation-form" onsubmit="handleReservationSubmit(event)" class="space-y-7">
         
-        <!-- Fila 1: Fecha, Turno y Personas -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          
-          <!-- Fecha -->
-          <div class="space-y-1.5">
-            <label class="block text-xs font-bold uppercase tracking-wider text-stone-300">
-              Fecha
-            </label>
-            <input type="date" id="res-date" required onchange="onDateOrTurnChange()" class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-3.5 py-3 text-white text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all">
+        <!-- SECCIÓN 1: SELECCIÓN VISUAL DEL DÍA (SÚPER FÁCIL) -->
+        <div class="space-y-3.5 p-4 sm:p-6 rounded-2xl bg-brand-surfaceLight border border-brand-border">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-brand-primary block">
+                Paso 1 · Elige el día
+              </span>
+              <span id="client-date-summary" class="text-sm sm:text-base font-bold text-white block mt-0.5">
+                📅 Cargando fecha...
+              </span>
+            </div>
+
+            <!-- Botones rápidos de acceso inmediato -->
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button type="button" onclick="selectQuickClientDate(0)" class="px-3 py-1.5 rounded-xl bg-brand-charcoal text-stone-200 hover:text-white hover:bg-brand-primary/20 border border-brand-border text-xs font-bold transition-all">Hoy</button>
+              <button type="button" onclick="selectQuickClientDate(1)" class="px-3 py-1.5 rounded-xl bg-brand-charcoal text-stone-200 hover:text-white hover:bg-brand-primary/20 border border-brand-border text-xs font-bold transition-all">Mañana</button>
+              <button type="button" onclick="selectClientNextWeekend('vie')" class="px-3 py-1.5 rounded-xl bg-brand-charcoal text-stone-200 hover:text-white hover:bg-brand-primary/20 border border-brand-border text-xs font-bold transition-all">Viernes</button>
+              <button type="button" onclick="selectClientNextWeekend('sab')" class="px-3 py-1.5 rounded-xl bg-brand-charcoal text-stone-200 hover:text-white hover:bg-brand-primary/20 border border-brand-border text-xs font-bold transition-all">Sábado</button>
+              <button type="button" onclick="selectClientNextWeekend('dom')" class="px-3 py-1.5 rounded-xl bg-brand-charcoal text-stone-200 hover:text-white hover:bg-brand-primary/20 border border-brand-border text-xs font-bold transition-all">Domingo</button>
+            </div>
           </div>
 
-          <!-- Turno (Comida o Cena) -->
-          <div class="space-y-1.5">
-            <label class="block text-xs font-bold uppercase tracking-wider text-stone-300">
-              Turno
+          <!-- Carrusel interactivo de los próximos 14 días (Tira táctil de fechas) -->
+          <div class="space-y-1.5 pt-1">
+            <span class="text-[11px] text-stone-400 font-medium">Toca el día que prefieras:</span>
+            <div id="days-carousel-container" class="flex gap-2 overflow-x-auto pb-2.5 pt-1 scrollbar-thin select-none">
+              <!-- Rellenado dinámicamente con los próximos 14 días en tarjetas táctiles -->
+            </div>
+          </div>
+
+          <!-- Selector de fecha para más adelante (otra fecha futura) -->
+          <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-brand-border/60">
+            <label for="res-date" class="text-xs text-stone-400 cursor-pointer flex items-center gap-1.5 hover:text-white">
+              <span>🗓️</span> ¿Quieres reservar para otra fecha más lejana?
             </label>
-            <select id="res-turn" required onchange="onDateOrTurnChange()" class="w-full bg-brand-charcoal border border-brand-border rounded-xl px-3.5 py-3 text-white text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-all cursor-pointer">
-              <option value="comida">Comidas (Mediodía)</option>
-              <option value="cena">Cenas (Noche)</option>
-            </select>
+            <input type="date" id="res-date" required onchange="onManualDateInput(this.value)"
+                   class="bg-brand-charcoal border border-brand-border rounded-xl px-3 py-1.5 text-white text-xs font-semibold focus:outline-none focus:border-brand-primary cursor-pointer">
+          </div>
+        </div>
+
+        <!-- SECCIÓN 2: TURNO Y COMENSALES -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Turno: Comida o Cena (Botones grandes visuales) -->
+          <div class="space-y-2">
+            <label class="block text-xs font-bold uppercase tracking-wider text-stone-300">
+              Paso 2 · Turno del servicio
+            </label>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" id="client-turn-comida" onclick="selectClientTurn('comida')"
+                      class="py-3 px-3 rounded-xl border text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all bg-brand-primary text-white border-brand-primary shadow-lg shadow-brand-primary/20 scale-[1.02]">
+                <span class="text-base">☀️</span>
+                <span>Comidas (Mediodía)</span>
+                <span class="text-[10px] opacity-80 font-normal">13:00 a 15:45</span>
+              </button>
+              <button type="button" id="client-turn-cena" onclick="selectClientTurn('cena')"
+                      class="py-3 px-3 rounded-xl border text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all bg-brand-charcoal text-stone-300 border-brand-border hover:border-stone-500 hover:text-white">
+                <span class="text-base">🌙</span>
+                <span>Cenas (Noche)</span>
+                <span class="text-[10px] opacity-80 font-normal">20:00 a 22:45</span>
+              </button>
+            </div>
+            <input type="hidden" id="res-turn" value="comida">
           </div>
 
           <!-- Comensales -->
-          <div class="space-y-1.5">
+          <div class="space-y-2">
             <label class="block text-xs font-bold uppercase tracking-wider text-stone-300">
-              Comensales
+              Paso 3 · Número de personas
             </label>
-            <div class="flex items-center bg-brand-charcoal border border-brand-border rounded-xl overflow-hidden h-[46px]">
-              <button type="button" onclick="adjustGuests(-1)" class="w-12 h-full text-stone-300 hover:text-white hover:bg-stone-800 text-xl font-bold transition-colors flex items-center justify-center select-none">
+            <div class="flex items-center bg-brand-charcoal border border-brand-border rounded-xl overflow-hidden h-[54px]">
+              <button type="button" onclick="adjustGuests(-1)" class="w-14 h-full text-stone-300 hover:text-white hover:bg-stone-800 text-2xl font-bold transition-colors flex items-center justify-center select-none active:scale-95">
                 −
               </button>
-              <input type="number" id="res-guests" value="2" min="1" max="25" readonly class="w-full bg-transparent text-center text-white font-bold text-base focus:outline-none select-none cursor-default">
-              <button type="button" onclick="adjustGuests(1)" class="w-12 h-full text-stone-300 hover:text-white hover:bg-stone-800 text-xl font-bold transition-colors flex items-center justify-center select-none">
+              <div class="flex-1 flex flex-col items-center justify-center">
+                <input type="number" id="res-guests" value="2" min="1" max="25" readonly class="w-full bg-transparent text-center text-white font-extrabold text-xl focus:outline-none select-none cursor-default">
+                <span class="text-[10px] text-stone-400 font-semibold -mt-1">personas</span>
+              </div>
+              <button type="button" onclick="adjustGuests(1)" class="w-14 h-full text-stone-300 hover:text-white hover:bg-stone-800 text-2xl font-bold transition-colors flex items-center justify-center select-none active:scale-95">
                 +
               </button>
             </div>
@@ -190,7 +235,6 @@
               ✨ Grupo grande: el sistema unirá mesas contiguas automáticamente.
             </p>
           </div>
-
         </div>
 
         <!-- Fila 2: Selector de Horas cada 15 min -->
@@ -1426,6 +1470,105 @@
       onDateOrTurnChange();
     }
 
+    /* SELECCIÓN VISUAL DEL DÍA (14 DÍAS + BOTONES RÁPIDOS) */
+    function initDaysCarousel() {
+      const container = document.getElementById('days-carousel-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const today = new Date();
+      const currentSelected = document.getElementById('res-date').value || getTodayString();
+
+      const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+      const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+      for (let i = 0; i < 14; i++) {
+        const d = new Date();
+        d.setDate(today.getDate() + i);
+        const iso = d.toISOString().split('T')[0];
+        const isSelected = iso === currentSelected;
+
+        let badgeLabel = dayNames[d.getDay()];
+        if (i === 0) badgeLabel = 'HOY';
+        else if (i === 1) badgeLabel = 'MAÑANA';
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.onclick = () => selectClientDateIso(iso);
+
+        if (isSelected) {
+          btn.className = 'flex flex-col items-center justify-center p-2.5 min-w-[72px] rounded-xl bg-brand-primary text-white border-2 border-brand-primary ring-2 ring-brand-primary/40 shadow-lg scale-105 shrink-0 transition-all cursor-pointer';
+        } else {
+          btn.className = 'flex flex-col items-center justify-center p-2.5 min-w-[72px] rounded-xl bg-brand-charcoal text-stone-300 border border-brand-border hover:border-stone-500 hover:text-white shrink-0 transition-all cursor-pointer';
+        }
+
+        btn.innerHTML = `
+          <span class="text-[10px] font-extrabold uppercase ${isSelected ? 'text-amber-200' : 'text-stone-400'}">${badgeLabel}</span>
+          <span class="text-lg font-black my-0.5 leading-tight">${d.getDate()}</span>
+          <span class="text-[10px] uppercase font-semibold ${isSelected ? 'text-white' : 'text-stone-400'}">${monthNames[d.getMonth()]}</span>
+        `;
+        container.appendChild(btn);
+      }
+
+      updateDateSummaryLabel(currentSelected);
+    }
+
+    function selectClientDateIso(iso) {
+      document.getElementById('res-date').value = iso;
+      initDaysCarousel();
+      onDateOrTurnChange();
+    }
+
+    function onManualDateInput(val) {
+      if (!val) return;
+      initDaysCarousel();
+      onDateOrTurnChange();
+    }
+
+    function selectQuickClientDate(offsetDays) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      selectClientDateIso(d.toISOString().split('T')[0]);
+    }
+
+    function selectClientNextWeekend(dayName) {
+      const targetDays = { 'vie': 5, 'sab': 6, 'dom': 0 };
+      const target = targetDays[dayName];
+      const d = new Date();
+      const current = d.getDay();
+      let diff = target - current;
+      if (diff <= 0) diff += 7;
+      d.setDate(d.getDate() + diff);
+      selectClientDateIso(d.toISOString().split('T')[0]);
+    }
+
+    function updateDateSummaryLabel(iso) {
+      const label = document.getElementById('client-date-summary');
+      if (!label || !iso) return;
+      const dateObj = new Date(iso + 'T00:00:00');
+      const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+      const str = dateObj.toLocaleDateString('es-ES', options);
+      label.innerText = '📅 ' + str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function selectClientTurn(turn) {
+      document.getElementById('res-turn').value = turn;
+      const bComida = document.getElementById('client-turn-comida');
+      const bCena = document.getElementById('client-turn-cena');
+
+      const activeClass = 'py-3 px-3 rounded-xl border text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all bg-brand-primary text-white border-brand-primary shadow-lg shadow-brand-primary/20 scale-[1.02]';
+      const inactiveClass = 'py-3 px-3 rounded-xl border text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all bg-brand-charcoal text-stone-300 border-brand-border hover:border-stone-500 hover:text-white';
+
+      if (turn === 'comida') {
+        bComida.className = activeClass;
+        bCena.className = inactiveClass;
+      } else {
+        bCena.className = activeClass;
+        bComida.className = inactiveClass;
+      }
+      onDateOrTurnChange();
+    }
+
     function onDateOrTurnChange() {
       const guests = parseInt(document.getElementById('res-guests').value) || 2;
       const groupNotice = document.getElementById('group-notice');
@@ -1985,6 +2128,7 @@
       document.getElementById('admin-date').value = today;
 
       initFirebaseSync();
+      initDaysCarousel();
       renderTimeSlots();
       updateHighchairsUI();
       checkAvailabilityPreview();

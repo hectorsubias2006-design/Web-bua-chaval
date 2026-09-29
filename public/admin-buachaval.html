@@ -140,15 +140,24 @@
       </div>
     </div>
 
-    <!-- Atajos Rápidos de Fecha: Hoy / Mañana -->
-    <div class="flex items-center gap-2 mt-2">
-      <button onclick="setDateToday()" class="px-2.5 py-1 rounded-md bg-stone-800/80 text-[11px] font-semibold text-stone-300 hover:text-white border border-brand-border">
+    <!-- Atajos Rápidos de Fecha: Hoy / Mañana / Fin de Semana -->
+    <div class="flex items-center gap-1.5 mt-2 overflow-x-auto pb-1">
+      <button onclick="setDateToday()" class="px-2.5 py-1 rounded-lg bg-stone-800 text-[11px] font-bold text-stone-200 hover:text-white hover:bg-brand-primary border border-brand-border shrink-0">
         Hoy
       </button>
-      <button onclick="setDateTomorrow()" class="px-2.5 py-1 rounded-md bg-stone-800/80 text-[11px] font-semibold text-stone-300 hover:text-white border border-brand-border">
+      <button onclick="setDateTomorrow()" class="px-2.5 py-1 rounded-lg bg-stone-800 text-[11px] font-bold text-stone-200 hover:text-white hover:bg-brand-primary border border-brand-border shrink-0">
         Mañana
       </button>
-      <span id="date-display-label" class="text-[11px] text-stone-400 font-medium ml-auto"></span>
+      <button onclick="setHeaderNextWeekend('vie')" class="px-2.5 py-1 rounded-lg bg-stone-800 text-[11px] font-bold text-stone-200 hover:text-white hover:bg-brand-primary border border-brand-border shrink-0">
+        Viernes
+      </button>
+      <button onclick="setHeaderNextWeekend('sab')" class="px-2.5 py-1 rounded-lg bg-stone-800 text-[11px] font-bold text-stone-200 hover:text-white hover:bg-brand-primary border border-brand-border shrink-0">
+        Sábado
+      </button>
+      <button onclick="setHeaderNextWeekend('dom')" class="px-2.5 py-1 rounded-lg bg-stone-800 text-[11px] font-bold text-stone-200 hover:text-white hover:bg-brand-primary border border-brand-border shrink-0">
+        Domingo
+      </button>
+      <span id="date-display-label" class="text-[11px] text-amber-400 font-bold ml-auto shrink-0"></span>
     </div>
   </header>
 
@@ -272,6 +281,48 @@
       </div>
 
       <form onsubmit="handleBookingSubmit(event)" class="space-y-3.5 text-xs">
+        
+        <!-- Selector Fácil de Fecha y Turno de la Reserva -->
+        <div class="p-3 bg-brand-charcoal border border-brand-border rounded-2xl space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-white text-xs flex items-center gap-1.5">
+              <span>📅</span> Día de la Reserva
+            </span>
+            <span id="bm-date-label" class="text-[11px] text-amber-400 font-bold"></span>
+          </div>
+
+          <!-- Botones rápidos de día -->
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+            <button type="button" onclick="setBookingModalDateQuick(0)" class="px-2.5 py-1 rounded-lg bg-stone-800 text-stone-200 text-[11px] font-bold hover:bg-brand-primary hover:text-white border border-brand-border shrink-0">Hoy</button>
+            <button type="button" onclick="setBookingModalDateQuick(1)" class="px-2.5 py-1 rounded-lg bg-stone-800 text-stone-200 text-[11px] font-bold hover:bg-brand-primary hover:text-white border border-brand-border shrink-0">Mañana</button>
+            <button type="button" onclick="setBookingModalNextWeekend('vie')" class="px-2.5 py-1 rounded-lg bg-stone-800 text-stone-200 text-[11px] font-bold hover:bg-brand-primary hover:text-white border border-brand-border shrink-0">Viernes</button>
+            <button type="button" onclick="setBookingModalNextWeekend('sab')" class="px-2.5 py-1 rounded-lg bg-stone-800 text-stone-200 text-[11px] font-bold hover:bg-brand-primary hover:text-white border border-brand-border shrink-0">Sábado</button>
+            <button type="button" onclick="setBookingModalNextWeekend('dom')" class="px-2.5 py-1 rounded-lg bg-stone-800 text-stone-200 text-[11px] font-bold hover:bg-brand-primary hover:text-white border border-brand-border shrink-0">Domingo</button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <div>
+              <label class="block text-[10px] text-stone-400 mb-0.5">Elegir en calendario</label>
+              <input type="date" id="bm-date" required onchange="onBookingModalDateOrTurnChange()"
+                     class="w-full bg-brand-surface border border-brand-border rounded-xl px-2.5 py-2 text-white text-xs font-semibold focus:outline-none focus:border-brand-primary">
+            </div>
+            <div>
+              <label class="block text-[10px] text-stone-400 mb-0.5">Turno</label>
+              <div class="grid grid-cols-2 bg-brand-surface border border-brand-border p-0.5 rounded-xl text-[11px] font-bold">
+                <button type="button" id="bm-turn-btn-comida" onclick="setBookingModalTurn('comida')"
+                        class="py-1.5 rounded-lg text-center transition-all bg-brand-primary text-white shadow">
+                  ☀️ Comida
+                </button>
+                <button type="button" id="bm-turn-btn-cena" onclick="setBookingModalTurn('cena')"
+                        class="py-1.5 rounded-lg text-center transition-all text-stone-400 hover:text-white">
+                  🌙 Cena
+                </button>
+              </div>
+              <input type="hidden" id="bm-turn" value="comida">
+            </div>
+          </div>
+        </div>
+
         <div>
           <label class="block font-semibold text-stone-300 mb-1">Nombre del cliente *</label>
           <input type="text" id="bm-name" required placeholder="Ej: Carlos Martínez"
@@ -501,6 +552,18 @@
       onAdminFilterChange();
     }
 
+    function setHeaderNextWeekend(dayName) {
+      const targetDays = { 'vie': 5, 'sab': 6, 'dom': 0 };
+      const target = targetDays[dayName];
+      const d = new Date();
+      const current = d.getDay();
+      let diff = target - current;
+      if (diff <= 0) diff += 7;
+      d.setDate(d.getDate() + diff);
+      document.getElementById('admin-date').value = d.toISOString().split('T')[0];
+      onAdminFilterChange();
+    }
+
     function setAdminTurn(turn) {
       currentTurn = turn;
       const bComida = document.getElementById('turn-btn-comida');
@@ -665,16 +728,77 @@
     }
 
     /* 5. GESTIÓN DE RESERVA MANUAL (+ APUNTAR) */
-    function openBookingModal() {
-      const slots = SLOTS[currentTurn];
+    let bookingModalTurn = 'comida';
+
+    function setBookingModalTurn(turn) {
+      bookingModalTurn = turn;
+      document.getElementById('bm-turn').value = turn;
+      const bComida = document.getElementById('bm-turn-btn-comida');
+      const bCena = document.getElementById('bm-turn-btn-cena');
+      if (turn === 'comida') {
+        bComida.className = 'py-1.5 rounded-lg text-center transition-all bg-brand-primary text-white shadow';
+        bCena.className = 'py-1.5 rounded-lg text-center transition-all text-stone-400 hover:text-white';
+      } else {
+        bCena.className = 'py-1.5 rounded-lg text-center transition-all bg-brand-primary text-white shadow';
+        bComida.className = 'py-1.5 rounded-lg text-center transition-all text-stone-400 hover:text-white';
+      }
+      onBookingModalDateOrTurnChange();
+    }
+
+    function setBookingModalDateQuick(offsetDays) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      document.getElementById('bm-date').value = d.toISOString().split('T')[0];
+      onBookingModalDateOrTurnChange();
+    }
+
+    function setBookingModalNextWeekend(dayName) {
+      const targetDays = { 'vie': 5, 'sab': 6, 'dom': 0 };
+      const target = targetDays[dayName];
+      const d = new Date();
+      const current = d.getDay();
+      let diff = target - current;
+      if (diff <= 0) diff += 7;
+      d.setDate(d.getDate() + diff);
+      document.getElementById('bm-date').value = d.toISOString().split('T')[0];
+      onBookingModalDateOrTurnChange();
+    }
+
+    function onBookingModalDateOrTurnChange() {
+      const d = document.getElementById('bm-date').value;
+      if (!d) return;
+      const dateObj = new Date(d + 'T00:00:00');
+      const options = { weekday: 'long', day: 'numeric', month: 'short' };
+      const str = dateObj.toLocaleDateString('es-ES', options);
+      document.getElementById('bm-date-label').innerText = '🗓️ ' + str.charAt(0).toUpperCase() + str.slice(1);
+
+      updateBookingModalSlots();
+    }
+
+    function updateBookingModalSlots() {
+      const turn = document.getElementById('bm-turn').value || 'comida';
       const sel = document.getElementById('bm-time');
+      const cur = sel.value;
       sel.innerHTML = '';
+      const slots = SLOTS[turn] || [];
       slots.forEach(s => {
         const opt = document.createElement('option');
         opt.value = s;
         opt.innerText = `${s} h`;
+        if (s === cur) opt.selected = true;
         sel.appendChild(opt);
       });
+    }
+
+    function onGuestsOrTimeChange() {
+      // Ajuste si es necesario
+    }
+
+    function openBookingModal() {
+      const currentHeaderDate = document.getElementById('admin-date').value || getTodayString();
+      document.getElementById('bm-date').value = currentHeaderDate;
+      document.getElementById('bm-date').min = getTodayString();
+      setBookingModalTurn(currentTurn);
 
       const tableSel = document.getElementById('bm-table');
       tableSel.innerHTML = '<option value="auto">⚡ Asignación Inteligente Automática</option>';
@@ -701,13 +825,14 @@
       const highchairs = parseInt(document.getElementById('bm-highchairs').value) || 0;
       const notes = document.getElementById('bm-notes').value.trim();
       const tableChoice = document.getElementById('bm-table').value;
-      const date = document.getElementById('admin-date').value;
+      const date = document.getElementById('bm-date').value || document.getElementById('admin-date').value;
+      const turn = document.getElementById('bm-turn').value || currentTurn;
 
       let tables = [];
       if (tableChoice === 'auto') {
-        tables = findSmartAllocation(date, currentTurn, guests);
+        tables = findSmartAllocation(date, turn, guests);
         if (!tables) {
-          alert(`No se encontró combinación de mesas libre para ${guests} comensales.`);
+          alert(`No se encontró combinación de mesas libre para ${guests} comensales en ese turno.`);
           return;
         }
       } else {
@@ -720,7 +845,7 @@
         phone,
         email: '',
         date,
-        turn: currentTurn,
+        turn,
         time,
         guests,
         tables,
